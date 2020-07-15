@@ -5,3 +5,6 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
+
+from . import plugin_directory
+from . import command_block
