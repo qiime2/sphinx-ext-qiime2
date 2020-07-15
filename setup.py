@@ -16,7 +16,7 @@ setup(
     url='https://qiime2.org',
     include_package_data=True,
     package_data={
-        '': ['*rst']
+        'q2doc.plugin_directory': ['*rst']
     },
 
 )
