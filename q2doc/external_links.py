@@ -8,5 +8,5 @@
 
 
 def setup(app):
-    app.add_javascript('external-links.js')
+    app.add_js_file('external-links.js')
     return {'version': '0.0.1'}
