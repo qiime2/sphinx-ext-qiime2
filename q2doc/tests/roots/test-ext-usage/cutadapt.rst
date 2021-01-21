@@ -1,0 +1,50 @@
+Download and import data used in this tutorial
+==============================================
+
+.. note::
+   the `forward.fastq.gz` and `metadata.tsv` files will be stored under
+   the `data/` dir, which will be the extent of the data scope. Everything
+   stored in `data/` will get download blocks generated automatically.
+
+.. usage::
+    def data_factory():
+        return Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
+                                    'forward.fastq.gz')
+    
+    def metadata_factory():
+        return Metadata.load('data/metadata.tsv')
+
+
+The data here consists of single-end reads (6 reads total). There are two
+samples present in the data, with the following barcodes on the 5' end:
+
+.. usage::
+    data = use.init_data('data', data_factory)
+    metadata = use.init_metadata('metadata', metadata_factory)
+
+
+Demultiplex the reads
+=====================
+
+Now that we have everything imported, let's do the thing:
+
+.. usage::
+  barcodes_col = use.get_metadata_column('barcodes', metadata)
+
+  use.action(
+      UsageAction(
+          plugin_id='cutadapt',
+          action_id='demux_single',
+      ),
+      UsageInputs(
+          seqs=data,
+          error_rate=0,
+          barcodes=barcodes_col,
+      ),
+      UsageOutputNames(
+          per_sample_sequences='demultiplexed_seqs',
+          untrimmed_sequences='untrimmed',
+      )
+  )
+
+As you can see - the reads are now demuxed. Enjoy!
