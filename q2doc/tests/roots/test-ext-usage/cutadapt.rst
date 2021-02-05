@@ -8,11 +8,11 @@ Download and import data used in this tutorial
 
 .. usage::
     def data_factory():
-        return Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
-                                    'forward.fastq.gz')
+        return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
+                                    'data/forward.fastq.gz')
     
     def metadata_factory():
-        return Metadata.load('data/metadata.tsv')
+        return qiime2.Metadata.load('data/metadata.tsv')
 
 
 The data here consists of single-end reads (6 reads total). There are two
@@ -32,16 +32,16 @@ Now that we have everything imported, let's do the thing:
   barcodes_col = use.get_metadata_column('barcodes', metadata)
 
   use.action(
-      UsageAction(
+      usage.UsageAction(
           plugin_id='cutadapt',
           action_id='demux_single',
       ),
-      UsageInputs(
+      usage.UsageInputs(
           seqs=data,
           error_rate=0,
           barcodes=barcodes_col,
       ),
-      UsageOutputNames(
+      usage.UsageOutputNames(
           per_sample_sequences='demultiplexed_seqs',
           untrimmed_sequences='untrimmed',
       )

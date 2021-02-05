@@ -1,12 +1,15 @@
 import ast
+from importlib import import_module
 
-import docutils
+from docutils import nodes
 from docutils.parsers.rst import Directive
 
+from qiime2.sdk import usage
 from q2cli.core.usage import CLIUsage
+from qiime2.plugins import ArtifactAPIUsage
 
 
-class UsageBlock(docutils.nodes.General, docutils.nodes.Element):
+class UsageBlock(nodes.General, nodes.Element):
     pass
 
 
@@ -15,7 +18,7 @@ class UsageDirective(Directive):
 
     def run(self):
         output = []
-        output.append(docutils.nodes.caption(text="Example"))
+        output.append(nodes.caption(text="Example"))
         code = "\n".join(self.content)
         env = self.state.document.settings.env
         if not hasattr(env, "usage_blocks"):
@@ -25,16 +28,37 @@ class UsageDirective(Directive):
 
 
 def process_usage_blocks(app, doctree, fromdocname):
-    use = CLIUsage()
-    exec("from qiime2.sdk.usage import "
-         "UsageAction, UsageInputs, UsageOutputNames")
     env = app.builder.env
+    qiime2, usage, drivers = dependencies()
     nodes_and_codes = zip(doctree.traverse(UsageBlock), env.usage_blocks)
     for node, code in nodes_and_codes:
-        code = code["code"]
         content = []
+        code = code["code"]
         tree = ast.parse(code)
-        exec(code)
+        source = compile(tree, filename="<ast>", mode="exec")
+        for use in drivers:
+            exec(source)
+            record_sources = scope_record_sources(use._scope.records)
+            if "action" in record_sources:
+                example = use.render()
+                example_node = nodes.literal_block(example, example)
+                content.append(example_node)
+        node.replace_self(content)
+
+
+def dependencies():
+    qiime2 = import_module("qiime2")
+    usage = import_module("qiime2.sdk.usage")
+    # TODO Return CLIUsage driver
+    drivers = (ArtifactAPIUsage(),)
+    return qiime2, usage, drivers
+
+
+def scope_record_sources(records):
+    sources = [r.source for r in records.values()]
+    return sources
+
+
 
 
 def setup(app):
