@@ -1,12 +1,17 @@
 import ast
-from importlib import import_module
+import os
+import operator
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
 
-from qiime2.sdk import usage
-from q2cli.core.usage import CLIUsage
+import qiime2
+import qiime2.sdk.usage as usage
+from qiime2 import Artifact, Metadata
 from qiime2.plugins import ArtifactAPIUsage
+from q2cli.core.usage import CLIUsage
+
+modules = (qiime2, usage, Artifact, Metadata)
 
 
 class UsageBlock(nodes.General, nodes.Element):
@@ -29,36 +34,41 @@ class UsageDirective(Directive):
 
 def process_usage_blocks(app, doctree, fromdocname):
     env = app.builder.env
-    qiime2, usage, drivers = dependencies()
-    nodes_and_codes = zip(doctree.traverse(UsageBlock), env.usage_blocks)
-    for node, code in nodes_and_codes:
-        content = []
-        code = code["code"]
-        tree = ast.parse(code)
-        source = compile(tree, filename="<ast>", mode="exec")
-        for use in drivers:
+    os.chdir(env.srcdir)
+    drivers = (ArtifactAPIUsage(), CLIUsage())
+    driver_nodes = []
+    nodes_ = []
+    for use in drivers:
+        for ix, (node, code) in enumerate(zip(doctree.traverse(UsageBlock), env.usage_blocks)):
+            code = code["code"]
+            tree = ast.parse(code)
+            source = compile(tree, filename="<ast>", mode="exec")
+            processed_records = set()
             exec(source)
-            record_sources = scope_record_sources(use._scope.records)
-            if "action" in record_sources:
-                example = use.render()
-                example_node = nodes.literal_block(example, example)
-                content.append(example_node)
-        node.replace_self(content)
+            new_records = get_new_records(use._scope.records, processed_records)
+            for record in new_records:
+                record_source = record.source
+                if record_source == "init_data":
+                    pass
+                elif record_source == "init_metadata":
+                    pass
+                elif record_source == "get_metadata_column":
+                    pass
+            if new_records:
+                refs = [i.ref for i in new_records]
+                processed_records.update(refs)
+        example = use.render()
+        example_node = nodes.literal_block(example, example)
+        nodes_.append(example_node)
+    driver_nodes = [*nodes_]
+    for node_list, tmp_node in zip(driver_nodes, doctree.traverse(UsageBlock)):
+        tmp_node.replace_self(node_list)
 
 
-def dependencies():
-    qiime2 = import_module("qiime2")
-    usage = import_module("qiime2.sdk.usage")
-    # TODO Return CLIUsage driver
-    drivers = (ArtifactAPIUsage(),)
-    return qiime2, usage, drivers
-
-
-def scope_record_sources(records):
-    sources = [r.source for r in records.values()]
-    return sources
-
-
+def get_new_records(records, processed_records):
+    new_records = records.keys() - processed_records
+    records = operator.itemgetter(*new_records)(records) if new_records else {}
+    return records
 
 
 def setup(app):
