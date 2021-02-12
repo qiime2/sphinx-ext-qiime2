@@ -8,7 +8,7 @@ import itertools
 from qiime2.plugins import ArtifactAPIUsage
 from q2cli.core.usage import CLIUsage
 
-from q2doc.usage.usage import records_to_nodes
+from q2doc.usage.usage import records_to_nodes, MetaUsage, get_new_records
 
 
 def data_factory():
@@ -23,34 +23,42 @@ def metadata_factory():
 def example_init_data(use):
     use.init_data('data', data_factory)
     use.init_metadata('metadata', metadata_factory)
-    records = use._scope.records.values()
-    return records
+
+
+@pytest.fixture(params=MetaUsage.__members__.values())
+def driver(request):
+    use = request.param.value
+    yield use
 
 
 def test_records_to_nodes_execution():
     use = usage.ExecutionUsage()
-    result = records_to_nodes(use, [])
-    assert result == []
-    records = example_init_data(use)
-    result = records_to_nodes(use, records)
+    example_init_data(use)
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [])
     exp = itertools.zip_longest(result, [], fillvalue=nodes.Node)
     assert all(itertools.starmap(isinstance, exp))
     assert len(result) == 4
-    assert result
 
 
-@pytest.mark.parametrize("use", [CLIUsage(), ArtifactAPIUsage()])
-def test_records_to_nodes_cli(use):
-    result = records_to_nodes(use, [])
-    assert result == []
-    example_init_data(use)
-    records = use._scope.records.values()
-    result = records_to_nodes(use, records)
+def test_records_to_nodes_no_records(driver):
+    use = driver
+    result = records_to_nodes(use, {}, [])
     assert not result
 
 
-def test_get_new_records():
-    pass
+def test_get_new_records(driver):
+    use = driver
+    result = get_new_records(use, [])
+    assert result is None
+    example_init_data(use)
+    result = get_new_records(use, [])
+    exp = itertools.zip_longest(result, [], fillvalue=usage.ScopeRecord)
+    assert len(result) == 2
+    assert all(itertools.starmap(isinstance, exp))
+    seen = [i.ref for i in result]
+    result = get_new_records(use, processed_records=seen)
+    assert result is None
 
 
 @pytest.mark.sphinx(buildername='html', testroot="ext-usage", freshenv=True)

@@ -5,6 +5,7 @@ import functools
 from enum import Enum
 from typing import List, Type
 
+import jinja2
 from docutils import nodes
 from docutils.parsers.rst import Directive
 
@@ -16,9 +17,27 @@ from q2cli.core.usage import CLIUsage
 
 modules = (qiime2, usage, Artifact, Metadata)
 
+loader = jinja2.PackageLoader('q2doc.usage', 'templates')
+jinja_env = jinja2.Environment(loader=loader)
+
 
 class UsageBlock(nodes.General, nodes.Element):
+    def __init__(self, titles=[], examples=[], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.titles = titles
+        self.examples = examples
+
+
+def visit_usage_node(self, node):
     pass
+
+
+def depart_usage_node(self, node):
+    if not node.titles:
+        return
+    template = jinja_env.get_template('usage.html')
+    rendered = template.render(node=node)
+    self.body.append(rendered)
 
 
 class UsageDirective(Directive):
@@ -41,33 +60,41 @@ def process_usage_blocks(app, doctree, fromdocname):
     all_nodes = {ix: [] for ix, _ in enumerate(env.usage_blocks)}
     for use in MetaUsage:
         use = use.value
+        # Use a list to preserve the order
         processed_records = []
         for ix, (node, code) in enumerate(zip(doctree.traverse(UsageBlock), env.usage_blocks)):
             # execute code in the block
+            current_blocks_nodes = all_nodes[ix]
             code = code["code"]
             tree = ast.parse(code)
             source = compile(tree, filename="<ast>", mode="exec")
             # TODO: validate the ast
             exec(source)
             new_records = get_new_records(use, processed_records)
-            nodes_ = records_to_nodes(use, new_records)
+            nodes_ = records_to_nodes(use, new_records, current_blocks_nodes) if new_records else []
             if nodes_:
                 all_nodes[ix].extend(nodes_)
-            if new_records:
-                refs = [i.ref for i in new_records]
-                processed_records.extend(refs)
+            update_processed_records(new_records, processed_records)
     for node_list, tmp_node in zip(all_nodes.values(), doctree.traverse(UsageBlock)):
         if node_list:
             tmp_node.replace_self(node_list)
 
 
+def update_processed_records(new_records, processed_records):
+    if new_records:
+        refs = [i.ref for i in new_records]
+        processed_records.extend(refs)
+
+
 @functools.singledispatch
-def records_to_nodes(use, records) -> List[Type[nodes.Node]]:
+def records_to_nodes(use, records, prev_nodes) -> List[Type[nodes.Node]]:
+    """Transform ScopeRecords into docutils Nodes.
+    """
     return [nodes.Node]
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
-def _(use, records):
+def _(use, records, prev_nodes):
     nodes_ = []
     for record in records:
         source = record.source
@@ -86,25 +113,36 @@ def _(use, records):
 
 
 @records_to_nodes.register(CLIUsage)
-@records_to_nodes.register(ArtifactAPIUsage)
-def _(use, records):
+def _(use, records, prev_nodes):
     nodes_ = []
     for record in records:
         source = record.source
         if source == "action":
-            result = use.render()
-            title = "Action"
-            nodes_.append(nodes.title(text=title))
-            nodes_.append(nodes.literal_block(result, result))
+            example = use.render()
+            nodes_.append(UsageBlock(titles=["Command Line"], examples=[example]))
+            break
+    return nodes_
+
+
+@records_to_nodes.register(ArtifactAPIUsage)
+def _(use, records, prev_nodes):
+    nodes_ = []
+    for record in records:
+        source = record.source
+        if source == "action":
+            node = prev_nodes[0]
+            example = use.render()
+            node.titles.append("Artifact API")
+            node.examples.append(example)
             break
     return nodes_
 
 
 def get_new_records(use, processed_records):
-    records = use._scope.records
-    # Use a list to preserve the order
+    """Select records from the Usage driver's Scope that we haven't seen yet."""
+    records = use._get_records()
     new_records = [k for k in records.keys() if k not in processed_records]
-    records = operator.itemgetter(*new_records)(records) if new_records else tuple()
+    records = operator.itemgetter(*new_records)(records) if new_records else None
     return records
 
 
@@ -116,8 +154,6 @@ class MetaUsage(Enum):
 
 def setup(app):
     app.add_directive("usage", UsageDirective)
-    app.add_node(
-        UsageBlock,
-        html=(lambda s, n: s.visit_admonition(n), lambda s, n: s.depart_admonition(n)),
-    )
+    app.add_node(UsageBlock, html=(visit_usage_node, depart_usage_node))
     app.connect("doctree-resolved", process_usage_blocks)
+

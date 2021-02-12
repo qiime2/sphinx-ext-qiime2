@@ -1,14 +1,13 @@
-sample-id	barcodes	body-site	year	month	day	subject	reported-antibiotic-usage	days-since-experiment-start
-#q2:types	categorical	categorical	numeric	numeric	numeric	categorical	categorical	numeric
-L1S8	AGCTGACTAGTC	gut	2008	10	28	subject-1	Yes	0
-L1S57	ACACACTATGGC	gut	2009	1	20	subject-1	No	84
-L1S76	ACTACGTGTGGT	gut	2009	2	17	subject-1	No	112
-L1S105	AGTGCGATGCGT	gut	2009	3	17	subject-1	No	140
-L2S155	ACGATGCGACCA	left palm	2009	1	20	subject-1	No	84
-L2S175	AGCTATCCACGA	left palm	2009	2	17	subject-1	No	112
-L2S204	ATGCAGCTCAGT	left palm	2009	3	17	subject-1	No	140
-L2S222	CACGTGACATGT	left palm	2009	4	14	subject-1	No	168
-L3S242	ACAGTTGCGCGA	right palm	2008	10	28	subject-1	Yes	0
-L3S294	CACGACAGGCTA	right palm	2009	1	20	subject-1	No	84
-L3S313	AGTGTCACGGTG	right palm	2009	2	17	subject-1	No	112
-L3S341	CAAGTGAGAGAG	right palm	2009	3	17	subject-1	No	140
+sample-id	barcodes
+L1S8	AGCTGACTAGTC
+L1S57	ACACACTATGGC
+L1S76	ACTACGTGTGGT
+L1S105	AGTGCGATGCGT
+L2S155	ACGATGCGACCA
+L2S175	AGCTATCCACGA
+L2S204	ATGCAGCTCAGT
+L2S222	CACGTGACATGT
+L3S242	ACAGTTGCGCGA
+L3S294	CACGACAGGCTA
+L3S313	AGTGTCACGGTG
+L3S341	CAAGTGAGAGAG
