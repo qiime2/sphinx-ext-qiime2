@@ -62,9 +62,16 @@ def test_get_new_records(driver):
 
 
 @pytest.mark.sphinx(buildername='html', testroot="ext-usage", freshenv=True)
-def test_usage_html(app):
+def test_usage_html(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
     build_result = (app.outdir / 'cutadapt.html').text()
-    assert "qiime2.plugins.cutadapt.methods" in build_result
+    file_regression.check(build_result, extension=".html")
+
+
+@pytest.mark.sphinx(buildername='html', testroot="ext-command-block", freshenv=True)
+def test_command_block_html(app):
+    app.build()
+    assert app.statuscode == 0
+    assert 'q2doc.command_block' in app.extensions

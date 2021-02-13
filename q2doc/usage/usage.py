@@ -17,7 +17,7 @@ from q2cli.core.usage import CLIUsage
 
 modules = (qiime2, usage, Artifact, Metadata)
 
-loader = jinja2.PackageLoader('q2doc.usage', 'templates')
+loader = jinja2.PackageLoader("q2doc.usage", "templates")
 jinja_env = jinja2.Environment(loader=loader)
 
 
@@ -35,7 +35,7 @@ def visit_usage_node(self, node):
 def depart_usage_node(self, node):
     if not node.titles:
         return
-    template = jinja_env.get_template('usage.html')
+    template = jinja_env.get_template("usage.html")
     rendered = template.render(node=node)
     self.body.append(rendered)
 
@@ -62,7 +62,9 @@ def process_usage_blocks(app, doctree, fromdocname):
         use = use.value
         # Use a list to preserve the order
         processed_records = []
-        for ix, (node, code) in enumerate(zip(doctree.traverse(UsageBlock), env.usage_blocks)):
+        for ix, (node, code) in enumerate(
+            zip(doctree.traverse(UsageBlock), env.usage_blocks)
+        ):
             # execute code in the block
             current_blocks_nodes = all_nodes[ix]
             code = code["code"]
@@ -71,7 +73,11 @@ def process_usage_blocks(app, doctree, fromdocname):
             # TODO: validate the ast
             exec(source)
             new_records = get_new_records(use, processed_records)
-            nodes_ = records_to_nodes(use, new_records, current_blocks_nodes) if new_records else []
+            nodes_ = (
+                records_to_nodes(use, new_records, current_blocks_nodes)
+                if new_records
+                else []
+            )
             if nodes_:
                 all_nodes[ix].extend(nodes_)
             update_processed_records(new_records, processed_records)
@@ -88,8 +94,7 @@ def update_processed_records(new_records, processed_records):
 
 @functools.singledispatch
 def records_to_nodes(use, records, prev_nodes) -> List[Type[nodes.Node]]:
-    """Transform ScopeRecords into docutils Nodes.
-    """
+    """Transform ScopeRecords into docutils Nodes."""
     return [nodes.Node]
 
 
@@ -156,4 +161,3 @@ def setup(app):
     app.add_directive("usage", UsageDirective)
     app.add_node(UsageBlock, html=(visit_usage_node, depart_usage_node))
     app.connect("doctree-resolved", process_usage_blocks)
-
