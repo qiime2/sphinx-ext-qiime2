@@ -1,23 +1,24 @@
+import itertools
 import os
-import pytest
+import pathlib
 
+import pytest
 import qiime2
 import qiime2.sdk.usage as usage
 from docutils import nodes
-import itertools
-from qiime2.plugins import ArtifactAPIUsage
 from q2cli.core.usage import CLIUsage
+from q2doc.usage.usage import MetaUsage, get_new_records, records_to_nodes
+from qiime2.plugins import ArtifactAPIUsage
 
-from q2doc.usage.usage import records_to_nodes, MetaUsage, get_new_records
-
+DATA = pathlib.Path(__file__).parent / "roots" / "test-ext-usage" / "data"
 
 def data_factory():
     return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
-                                       'roots/test-ext-usage/data/forward.fastq.gz')
+                                       DATA / 'forward.fastq.gz')
 
 
 def metadata_factory():
-    return qiime2.Metadata.load('roots/test-ext-usage/data/metadata.tsv')
+    return qiime2.Metadata.load(DATA / 'metadata.tsv')
 
 
 def example_init_data(use):
