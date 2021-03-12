@@ -31,7 +31,15 @@ sys.path.insert(0, str(root))
 
 master_doc = "index"
 templates_path = ['_templates']
-extensions = ['q2doc.usage']
+extensions = [
+    'q2doc.question',
+    'q2doc.qiime1',
+    'q2doc.checkpoint',
+    'q2doc.command_block',
+    'q2doc.usage',
+    'q2doc.external_links',
+]
+
 source_suffix = '.rst'
 project = 'QIIME 2'
 copyright = '2016-2020, QIIME 2 development team'

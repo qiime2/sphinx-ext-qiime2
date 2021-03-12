@@ -10,7 +10,7 @@ from q2cli.core.usage import CLIUsage
 from q2doc.usage.usage import MetaUsage, get_new_records, records_to_nodes
 from qiime2.plugins import ArtifactAPIUsage
 
-DATA = pathlib.Path(__file__).parent / "roots" / "test-ext-usage" / "data"
+DATA = pathlib.Path(__file__).parent / "roots" / "test-q2doc" / "data"
 
 
 def data_factory():
@@ -68,16 +68,17 @@ def test_get_new_records(example_init_data):
     assert result is None
 
 
-@pytest.mark.sphinx(buildername='dirhtml', testroot="ext-usage", freshenv=True)
+@pytest.mark.sphinx(buildername='dirhtml', testroot="q2doc", freshenv=True,
+                    confoverrides={"command_block_no_exec": True})
 def test_usage_html(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
     build_result = app.outdir / 'tutorials' / 'cutadapt' / 'index.html'
-    file_regression.check(build_result.text(), extension=".html")
+    file_regression.check(build_result.read_text(), extension=".html")
 
 
-@pytest.mark.sphinx(buildername='html', testroot="ext-command-block", freshenv=True)
+@pytest.mark.sphinx(buildername='html', testroot="q2doc", freshenv=True)
 def test_command_block_html(app):
     app.build()
     assert app.statuscode == 0
