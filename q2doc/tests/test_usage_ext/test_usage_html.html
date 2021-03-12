@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download and import data used in this tutorial &#8212; QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/style.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Download and import data used in this tutorial</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="download-and-import-data-used-in-this-tutorial">
+<h1>Download and import data used in this tutorial<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>the <cite>forward.fastq.gz</cite> and <cite>metadata.tsv</cite> files will be stored under
+the <cite>data/</cite> dir, which will be the extent of the data scope. Everything
+stored in <cite>data/</cite> will get download blocks generated automatically.</p>
+</div>
+<p>The data here consists of single-end reads (6 reads total). There are two
+samples present in the data, with the following barcodes on the 5’ end:</p>
+<h1>Data<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MultiplexedSingleEndBarcodeInSequence</span>
+</pre></div>
+</div>
+<h1>Metadata<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>               <span class="n">barcodes</span>
+<span class="n">sample</span><span class="o">-</span><span class="nb">id</span>              
+<span class="n">L1S8</span>       <span class="n">AGCTGACTAGTC</span>
+<span class="n">L1S57</span>      <span class="n">ACACACTATGGC</span>
+<span class="n">L1S76</span>      <span class="n">ACTACGTGTGGT</span>
+<span class="n">L1S105</span>     <span class="n">AGTGCGATGCGT</span>
+<span class="n">L2S155</span>     <span class="n">ACGATGCGACCA</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="demultiplex-the-reads">
+<h1>Demultiplex the reads<a class="headerlink" href="#demultiplex-the-reads" title="Permalink to this headline">¶</a></h1>
+<p>Now that we have everything imported, let’s do the thing:</p>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line</strong>
+
+                <div class="highlight">
+                    <pre><generator object CLIUsage.render at 0x7f9e58ea5780></pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>from qiime2.plugins.cutadapt.methods import demux_single
+
+barcodes = metadata.get_column('barcodes')
+
+demultiplexed_seqs, untrimmed = demux_single(
+    seqs=data,
+    barcodes=barcodes,
+    error_rate=0,
+)
+</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div><p>As you can see - the reads are now demuxed. Enjoy!</p>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="#">Table of Contents</a></h3>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Download and import data used in this tutorial</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016-2020, QIIME 2 development team.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.2.
+    </div>
+  </body>
+</html>
