@@ -29,7 +29,8 @@ import qiime2
 root = pathlib.Path(__file__).parent.absolute()
 sys.path.insert(0, str(root))
 
-master_doc = "cutadapt"
+master_doc = "index"
+templates_path = ['_templates']
 extensions = ['q2doc.usage']
 source_suffix = '.rst'
 project = 'QIIME 2'
