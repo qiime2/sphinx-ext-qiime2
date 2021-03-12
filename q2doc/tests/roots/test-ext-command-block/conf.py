@@ -34,15 +34,9 @@ import qiime2
 root = pathlib.Path(__file__).parent.absolute()
 sys.path.insert(0, str(root))
 
-from utils import generate_plugin_rst, cleanup_plugin_rst  # noqa: E402
-
 # -- Dynamic content configuration ----------------------------------------
 # These items generate and cleanup dynamic content required for the build
 # process.
-
-
-def setup(app):
-    app.connect('build-finished', cleanup_plugin_rst)
 
 
 # -- General configuration ------------------------------------------------
@@ -55,13 +49,6 @@ def setup(app):
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.githubpages',
-    'sphinxcontrib.bibtex',
     'q2doc.question',
     'q2doc.qiime1',
     'q2doc.checkpoint',
@@ -69,8 +56,6 @@ extensions = [
     'q2doc.external_links',
 ]
 
-
-bibtex_bibfiles = [str(p.relative_to(root)) for p in root.rglob("*.bib")]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
