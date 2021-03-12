@@ -123,7 +123,7 @@ def _(use, records, prev_nodes):
     for record in records:
         source = record.source
         if source == "action":
-            example = use.render()
+            example = "".join(use.render())
             nodes_.append(UsageBlock(titles=["Command Line"], examples=[example]))
             break
     return nodes_
