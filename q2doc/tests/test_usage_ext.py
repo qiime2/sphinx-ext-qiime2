@@ -12,6 +12,7 @@ from qiime2.plugins import ArtifactAPIUsage
 
 DATA = pathlib.Path(__file__).parent / "roots" / "test-ext-usage" / "data"
 
+
 def data_factory():
     return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
                                        DATA / 'forward.fastq.gz')
@@ -21,25 +22,33 @@ def metadata_factory():
     return qiime2.Metadata.load(DATA / 'metadata.tsv')
 
 
-def example_init_data(use):
-    use.init_data('data', data_factory)
-    use.init_metadata('metadata', metadata_factory)
-
-
 @pytest.fixture(params=MetaUsage.__members__.values())
 def driver(request):
     use = request.param.value
     yield use
 
 
-def test_records_to_nodes_execution():
-    use = usage.ExecutionUsage()
-    example_init_data(use)
+@pytest.fixture
+def example_init_data(driver):
+    use = driver
+    use.init_data('data', data_factory)
+    use.init_metadata('metadata', metadata_factory)
+    yield use
+
+
+@pytest.mark.parametrize(
+    "driver,exp",
+    [(usage.ExecutionUsage, 4), (CLIUsage, 0), (ArtifactAPIUsage, 0)]
+)
+def test_init_data_records_to_nodes(driver, exp):
+    use = driver()
+    use.init_data('data', data_factory)
+    use.init_metadata('metadata', metadata_factory)
     records = get_new_records(use, [])
     result = records_to_nodes(use, records, [])
-    exp = itertools.zip_longest(result, [], fillvalue=nodes.Node)
-    assert all(itertools.starmap(isinstance, exp))
-    assert len(result) == 4
+    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
+    assert all(itertools.starmap(isinstance, exp_nodes))
+    assert len(result) == exp
 
 
 def test_records_to_nodes_no_records(driver):
@@ -48,11 +57,8 @@ def test_records_to_nodes_no_records(driver):
     assert not result
 
 
-def test_get_new_records(driver):
-    use = driver
-    result = get_new_records(use, [])
-    assert result is None
-    example_init_data(use)
+def test_get_new_records(example_init_data):
+    use = example_init_data
     result = get_new_records(use, [])
     exp = itertools.zip_longest(result, [], fillvalue=usage.ScopeRecord)
     assert len(result) == 2
@@ -62,13 +68,13 @@ def test_get_new_records(driver):
     assert result is None
 
 
-@pytest.mark.sphinx(buildername='html', testroot="ext-usage", freshenv=True)
+@pytest.mark.sphinx(buildername='dirhtml', testroot="ext-usage", freshenv=True)
 def test_usage_html(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
-    build_result = (app.outdir / 'cutadapt.html').text()
-    file_regression.check(build_result, extension=".html")
+    build_result = app.outdir / 'tutorials' / 'cutadapt' / 'index.html'
+    file_regression.check(build_result.text(), extension=".html")
 
 
 @pytest.mark.sphinx(buildername='html', testroot="ext-command-block", freshenv=True)
