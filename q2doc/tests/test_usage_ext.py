@@ -23,14 +23,14 @@ def metadata_factory():
 
 
 @pytest.fixture(params=MetaUsage.__members__.values())
-def driver(request):
+def usage_drivers(request):
     use = request.param.value
     yield use
 
 
 @pytest.fixture
-def example_init_data(driver):
-    use = driver
+def example_init_data(usage_drivers):
+    use = usage_drivers
     use.init_data('data', data_factory)
     use.init_metadata('metadata', metadata_factory)
     yield use
@@ -51,8 +51,8 @@ def test_init_data_records_to_nodes(driver, exp):
     assert len(result) == exp
 
 
-def test_records_to_nodes_no_records(driver):
-    use = driver
+def test_records_to_nodes_no_records(usage_drivers):
+    use = usage_drivers
     result = records_to_nodes(use, {}, [])
     assert not result
 
