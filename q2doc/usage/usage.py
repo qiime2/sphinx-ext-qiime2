@@ -81,7 +81,9 @@ def process_usage_blocks(app, doctree, fromdocname):
             if nodes_:
                 all_nodes[ix].extend(nodes_)
             update_processed_records(new_records, processed_records)
-    for node_list, tmp_node in zip(all_nodes.values(), doctree.traverse(UsageBlock)):
+    for node_list, tmp_node in zip(
+        all_nodes.values(), doctree.traverse(UsageBlock)
+    ):
         if node_list:
             tmp_node.replace_self(node_list)
 
@@ -104,7 +106,6 @@ def _(use, records, prev_nodes):
     for record in records:
         source = record.source
         data = record.result
-        record_type = type(record.result)
         if source == "init_data":
             nodes_.append(nodes.title(text="Data"))
             data = str(data.type)
@@ -124,7 +125,9 @@ def _(use, records, prev_nodes):
         source = record.source
         if source == "action":
             example = "".join(use.render())
-            nodes_.append(UsageBlock(titles=["Command Line"], examples=[example]))
+            nodes_.append(
+                UsageBlock(titles=["Command Line"], examples=[example])
+            )
             break
     return nodes_
 
@@ -144,10 +147,13 @@ def _(use, records, prev_nodes):
 
 
 def get_new_records(use, processed_records):
-    """Select records from the Usage driver's Scope that we haven't seen yet."""
+    """Select records from the Usage driver's Scope that we haven't seen yet.
+    """
     records = use._get_records()
     new_records = [k for k in records.keys() if k not in processed_records]
-    records = operator.itemgetter(*new_records)(records) if new_records else None
+    records = (
+        operator.itemgetter(*new_records)(records) if new_records else None
+    )
     return records
 
 
