@@ -1,25 +1,17 @@
 import itertools
-import os
 import pathlib
+from unittest.mock import Mock
 
 import pytest
+from docutils import nodes
+
 import qiime2
 import qiime2.sdk.usage as usage
-from docutils import nodes
 from q2cli.core.usage import CLIUsage
 from q2doc.usage.usage import MetaUsage, get_new_records, records_to_nodes
 from qiime2.plugins import ArtifactAPIUsage
 
 DATA = pathlib.Path(__file__).parent / "roots" / "test-q2doc" / "data"
-
-
-def data_factory():
-    return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
-                                       DATA / 'forward.fastq.gz')
-
-
-def metadata_factory():
-    return qiime2.Metadata.load(DATA / 'metadata.tsv')
 
 
 @pytest.fixture(params=MetaUsage.__members__.values())
@@ -29,26 +21,47 @@ def usage_drivers(request):
 
 
 @pytest.fixture
-def example_init_data(usage_drivers):
+def drivers_with_initialized_data(usage_drivers):
     use = usage_drivers
-    use.init_data('data', data_factory)
-    use.init_metadata('metadata', metadata_factory)
+    init_data(use)
     yield use
 
 
-@pytest.mark.parametrize(
-    "driver,exp",
-    [(usage.ExecutionUsage, 4), (CLIUsage, 0), (ArtifactAPIUsage, 0)]
-)
-def test_init_data_records_to_nodes(driver, exp):
-    use = driver()
+def data_factory():
+    return qiime2.Artifact.import_data(
+        'MultiplexedSingleEndBarcodeInSequence',
+        DATA / 'forward.fastq.gz')
+
+
+def metadata_factory():
+    return qiime2.Metadata.load(DATA / 'metadata.tsv')
+
+
+def init_data(use):
+    data = use.init_data('data', data_factory)
+    metadata = use.init_metadata('metadata', metadata_factory)
     use.init_data('data', data_factory)
     use.init_metadata('metadata', metadata_factory)
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [])
-    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
-    assert all(itertools.starmap(isinstance, exp_nodes))
-    assert len(result) == exp
+    return use, data, metadata
+
+
+def cutadapt_example(use, data, metadata):
+    barcodes_col = use.get_metadata_column('barcodes', metadata)
+    use.action(
+        usage.UsageAction(
+            plugin_id='cutadapt',
+            action_id='demux_single',
+        ),
+        usage.UsageInputs(
+            seqs=data,
+            error_rate=0,
+            barcodes=barcodes_col,
+        ),
+        usage.UsageOutputNames(
+            per_sample_sequences='demultiplexed_seqs',
+            untrimmed_sequences='untrimmed',
+        )
+    )
 
 
 def test_records_to_nodes_no_records(usage_drivers):
@@ -57,8 +70,54 @@ def test_records_to_nodes_no_records(usage_drivers):
     assert not result
 
 
-def test_get_new_records(example_init_data):
-    use = example_init_data
+def test_records_to_nodes_execution_usage():
+    use = usage.ExecutionUsage()
+    use, data, metadata = init_data(use)
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [])
+
+    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
+    assert all(itertools.starmap(isinstance, exp_nodes))
+    assert len(result) == 4
+
+    cutadapt_example(use, data, metadata)
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [Mock()])
+
+
+def test_records_to_nodes_cli_usage():
+    use = CLIUsage()
+    use, data, metadata = init_data(use)
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [])
+
+    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
+    assert all(itertools.starmap(isinstance, exp_nodes))
+    assert len(result) == 0
+
+    cutadapt_example(use, data, metadata)
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [Mock()])
+
+
+def test_records_to_nodes_artifact_api_usage():
+    use = ArtifactAPIUsage()
+    use, data, metadata = init_data(use)
+
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [])
+
+    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
+    assert all(itertools.starmap(isinstance, exp_nodes))
+    assert len(result) == 0
+    cutadapt_example(use, data, metadata)
+
+    records = get_new_records(use, [])
+    result = records_to_nodes(use, records, [Mock()])
+
+
+def test_get_new_records(drivers_with_initialized_data):
+    use = drivers_with_initialized_data
     result = get_new_records(use, [])
     exp = itertools.zip_longest(result, [], fillvalue=usage.ScopeRecord)
     assert len(result) == 2

@@ -3,7 +3,7 @@ import os
 import operator
 import functools
 from enum import Enum
-from typing import List, Type, Union, Tuple
+from typing import List, Union, Tuple
 
 import jinja2
 from docutils import nodes
@@ -67,22 +67,26 @@ def process_usage_blocks(app, doctree, fromdocname):
     all_nodes = {ix: [] for ix, _ in enumerate(env.usage_blocks)}
     for use in MetaUsage:
         use = use.value
-        # Use a list to preserve the order
-        processed_records = []
-        tree = doctree.traverse(UsageBlock)
-        for ix, (node, code) in enumerate(zip(tree, env.usage_blocks)):
-            current_blocks_nodes = all_nodes[ix]
-            # Grab code in the current block and execute it.
-            code = code["code"]
-            tree = ast.parse(code)
-            source = compile(tree, filename="<ast>", mode="exec")
-            # TODO: validate the ast
-            exec(source)
-            new_records = get_new_records(use, processed_records)
-            nodes_ = records_to_nodes(use, new_records, current_blocks_nodes)
-            all_nodes[ix].extend(nodes_)
-            update_processed_records(new_records, processed_records)
+        process_usage_block(all_nodes, doctree, env, use)
     update_nodes(doctree, all_nodes)
+
+
+def process_usage_block(all_nodes, doctree, env, use):
+    # Use a list to preserve the order
+    processed_records = []
+    tree = doctree.traverse(UsageBlock)
+    for ix, (node, code) in enumerate(zip(tree, env.usage_blocks)):
+        current_blocks_nodes = all_nodes[ix]
+        # Grab code in the current block and execute it.
+        code = code["code"]
+        tree = ast.parse(code)
+        source = compile(tree, filename="<ast>", mode="exec")
+        # TODO: validate the ast
+        exec(source)
+        new_records = get_new_records(use, processed_records)
+        nodes_ = records_to_nodes(use, new_records, current_blocks_nodes)
+        all_nodes[ix].extend(nodes_)
+        update_processed_records(new_records, processed_records)
 
 
 def update_nodes(doctree, nodes):
@@ -94,13 +98,14 @@ def update_nodes(doctree, nodes):
 
 
 @functools.singledispatch
-def records_to_nodes(use, records, prev_nodes) -> Union[List[nodes.Node], list]:
+def records_to_nodes(use, records, prev_nodes) -> Union[List[nodes.Node],
+                                                        list]:
     """Transform ScopeRecords into docutils Nodes."""
     return [nodes.Node]
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
-def _(use, records, prev_nodes):
+def execution(use, records, prev_nodes):
     nodes_ = []
     for record in records:
         source = record.source
@@ -118,7 +123,7 @@ def _(use, records, prev_nodes):
 
 
 @records_to_nodes.register(CLIUsage)
-def _(use, records, prev_nodes):
+def cli(use, records, prev_nodes):
     nodes_ = []
     for record in records:
         source = record.source
@@ -132,7 +137,7 @@ def _(use, records, prev_nodes):
 
 
 @records_to_nodes.register(ArtifactAPIUsage)
-def _(use, records, prev_nodes):
+def artifact_api(use, records, prev_nodes):
     nodes_ = []
     for record in records:
         source = record.source
@@ -157,9 +162,8 @@ def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
 
 
 def update_processed_records(new_records, processed_records):
-    if new_records:
-        refs = [i.ref for i in new_records]
-        processed_records.extend(refs)
+    refs = [i.ref for i in new_records]
+    processed_records.extend(refs)
 
 
 def setup(app):
