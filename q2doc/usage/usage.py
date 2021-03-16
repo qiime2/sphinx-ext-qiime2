@@ -84,7 +84,7 @@ def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
     for block in blocks:
-        current_blocks_nodes = block["nodes"]
+        nodes = block["nodes"]
         # Grab code in the current block and execute it.
         code = block["code"]
         tree = ast.parse(code)
@@ -92,7 +92,7 @@ def process_usage_block(blocks, use):
         # TODO: validate the ast
         exec(source)
         new_records = get_new_records(use, processed_records)
-        nodes = records_to_nodes(use, new_records, current_blocks_nodes)
+        nodes = records_to_nodes(use, new_records, nodes)
         block["nodes"].extend(nodes)
         update_processed_records(new_records, processed_records)
 
@@ -100,8 +100,8 @@ def process_usage_block(blocks, use):
 def update_nodes(doctree, blocks):
     tree = doctree.traverse(UsageBlock)
     for block, tmp_node in zip(blocks, tree):
-        # Note sure if this check is necessary.
         nodes = block["nodes"]
+        # Not sure if this check is necessary.
         if nodes:
             tmp_node.replace_self(nodes)
 
