@@ -69,28 +69,26 @@ def process_usage_blocks(app, doctree, fromdocname):
         use = use.value
         # Use a list to preserve the order
         processed_records = []
-        for ix, (node, code) in enumerate(
-            zip(doctree.traverse(UsageBlock), env.usage_blocks)
-        ):
-            # execute code in the block
+        tree = doctree.traverse(UsageBlock)
+        for ix, (node, code) in enumerate(zip(tree, env.usage_blocks)):
             current_blocks_nodes = all_nodes[ix]
+            # Grab code in the current block and execute it.
             code = code["code"]
             tree = ast.parse(code)
             source = compile(tree, filename="<ast>", mode="exec")
             # TODO: validate the ast
             exec(source)
             new_records = get_new_records(use, processed_records)
-            nodes_ = (
-                records_to_nodes(use, new_records, current_blocks_nodes)
-                if new_records
-                else []
-            )
-            if nodes_:
-                all_nodes[ix].extend(nodes_)
+            nodes_ = records_to_nodes(use, new_records, current_blocks_nodes)
+            all_nodes[ix].extend(nodes_)
             update_processed_records(new_records, processed_records)
-    for node_list, tmp_node in zip(
-        all_nodes.values(), doctree.traverse(UsageBlock)
-    ):
+    update_nodes(doctree, all_nodes)
+
+
+def update_nodes(doctree, nodes):
+    tree = doctree.traverse(UsageBlock)
+    for node_list, tmp_node in zip(nodes.values(), tree):
+        # Note sure if this check is necessary.
         if node_list:
             tmp_node.replace_self(node_list)
 
@@ -153,7 +151,7 @@ def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
     records = use._get_records()
     new_records = [k for k in records.keys() if k not in processed_records]
     records = (
-        operator.itemgetter(*new_records)(records) if new_records else None
+        operator.itemgetter(*new_records)(records) if new_records else tuple()
     )
     return records
 

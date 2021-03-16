@@ -65,7 +65,7 @@ def test_get_new_records(example_init_data):
     assert all(itertools.starmap(isinstance, exp))
     seen = [i.ref for i in result]
     result = get_new_records(use, processed_records=seen)
-    assert result is None
+    assert result == tuple()
 
 
 @pytest.mark.sphinx(buildername='dirhtml', testroot="q2doc", freshenv=True,
