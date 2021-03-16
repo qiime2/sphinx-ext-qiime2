@@ -3,7 +3,7 @@ import os
 import operator
 import functools
 from enum import Enum
-from typing import List, Type
+from typing import List, Type, Union, Tuple
 
 import jinja2
 from docutils import nodes
@@ -11,6 +11,7 @@ from docutils.parsers.rst import Directive
 
 import qiime2
 import qiime2.sdk.usage as usage
+from qiime2.sdk.usage import ScopeRecord
 from qiime2 import Artifact, Metadata
 from qiime2.plugins import ArtifactAPIUsage
 from q2cli.core.usage import CLIUsage
@@ -21,23 +22,17 @@ loader = jinja2.PackageLoader("q2doc.usage", "templates")
 jinja_env = jinja2.Environment(loader=loader)
 
 
+class MetaUsage(Enum):
+    execution = usage.ExecutionUsage()
+    cli = CLIUsage()
+    artifact_api = ArtifactAPIUsage()
+
+
 class UsageBlock(nodes.General, nodes.Element):
     def __init__(self, titles=[], examples=[], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.titles = titles
         self.examples = examples
-
-
-def visit_usage_node(self, node):
-    pass
-
-
-def depart_usage_node(self, node):
-    if not node.titles:
-        return
-    template = jinja_env.get_template("usage.html")
-    rendered = template.render(node=node)
-    self.body.append(rendered)
 
 
 class UsageDirective(Directive):
@@ -52,6 +47,18 @@ class UsageDirective(Directive):
             env.usage_blocks = []
         env.usage_blocks.append({"code": code})
         return [UsageBlock()]
+
+
+def visit_usage_node(self, node):
+    pass
+
+
+def depart_usage_node(self, node):
+    if not node.titles:
+        return
+    template = jinja_env.get_template("usage.html")
+    rendered = template.render(node=node)
+    self.body.append(rendered)
 
 
 def process_usage_blocks(app, doctree, fromdocname):
@@ -88,14 +95,8 @@ def process_usage_blocks(app, doctree, fromdocname):
             tmp_node.replace_self(node_list)
 
 
-def update_processed_records(new_records, processed_records):
-    if new_records:
-        refs = [i.ref for i in new_records]
-        processed_records.extend(refs)
-
-
 @functools.singledispatch
-def records_to_nodes(use, records, prev_nodes) -> List[Type[nodes.Node]]:
+def records_to_nodes(use, records, prev_nodes) -> Union[List[nodes.Node], list]:
     """Transform ScopeRecords into docutils Nodes."""
     return [nodes.Node]
 
@@ -146,7 +147,7 @@ def _(use, records, prev_nodes):
     return nodes_
 
 
-def get_new_records(use, processed_records):
+def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
     """Select records from the Usage driver's Scope that we haven't seen yet.
     """
     records = use._get_records()
@@ -157,10 +158,10 @@ def get_new_records(use, processed_records):
     return records
 
 
-class MetaUsage(Enum):
-    execution = usage.ExecutionUsage()
-    cli = CLIUsage()
-    artifact_api = ArtifactAPIUsage()
+def update_processed_records(new_records, processed_records):
+    if new_records:
+        refs = [i.ref for i in new_records]
+        processed_records.extend(refs)
 
 
 def setup(app):
