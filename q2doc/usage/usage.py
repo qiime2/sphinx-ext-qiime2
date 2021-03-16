@@ -61,40 +61,49 @@ def depart_usage_node(self, node):
     self.body.append(rendered)
 
 
-def process_usage_blocks(app, doctree, fromdocname):
+def extract_blocks(doctree, env):
+    blocks = []
+    tree = doctree.traverse(UsageBlock)
+    for node, code in zip(tree, env.usage_blocks):
+        blocks.append({"code": code["code"],
+                       "nodes": []})
+    return blocks
+
+
+def process_usage_blocks(app, doctree, _):
     env = app.builder.env
     os.chdir(env.srcdir)
-    all_nodes = {ix: [] for ix, _ in enumerate(env.usage_blocks)}
+    blocks = extract_blocks(doctree, env)
     for use in MetaUsage:
         use = use.value
-        process_usage_block(all_nodes, doctree, env, use)
-    update_nodes(doctree, all_nodes)
+        process_usage_block(blocks, use)
+    update_nodes(doctree, blocks)
 
 
-def process_usage_block(all_nodes, doctree, env, use):
+def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
-    tree = doctree.traverse(UsageBlock)
-    for ix, (node, code) in enumerate(zip(tree, env.usage_blocks)):
-        current_blocks_nodes = all_nodes[ix]
+    for block in blocks:
+        current_blocks_nodes = block["nodes"]
         # Grab code in the current block and execute it.
-        code = code["code"]
+        code = block["code"]
         tree = ast.parse(code)
         source = compile(tree, filename="<ast>", mode="exec")
         # TODO: validate the ast
         exec(source)
         new_records = get_new_records(use, processed_records)
-        nodes_ = records_to_nodes(use, new_records, current_blocks_nodes)
-        all_nodes[ix].extend(nodes_)
+        nodes = records_to_nodes(use, new_records, current_blocks_nodes)
+        block["nodes"].extend(nodes)
         update_processed_records(new_records, processed_records)
 
 
-def update_nodes(doctree, nodes):
+def update_nodes(doctree, blocks):
     tree = doctree.traverse(UsageBlock)
-    for node_list, tmp_node in zip(nodes.values(), tree):
+    for block, tmp_node in zip(blocks, tree):
         # Note sure if this check is necessary.
-        if node_list:
-            tmp_node.replace_self(node_list)
+        nodes = block["nodes"]
+        if nodes:
+            tmp_node.replace_self(nodes)
 
 
 @functools.singledispatch
