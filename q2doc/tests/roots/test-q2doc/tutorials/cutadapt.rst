@@ -1,5 +1,8 @@
+Cutadapt Tutorial
+=================
+
 Download and import data used in this tutorial
-==============================================
+----------------------------------------------
 
 .. note::
    the `forward.fastq.gz` and `metadata.tsv` files will be stored under
@@ -24,7 +27,7 @@ samples present in the data, with the following barcodes on the 5' end:
 
 
 Demultiplex the reads
-=====================
+---------------------
 
 Now that we have everything imported, let's do the thing:
 
