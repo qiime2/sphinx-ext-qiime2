@@ -6,7 +6,7 @@ from enum import Enum
 from typing import List, Union, Tuple
 
 import jinja2
-from docutils import nodes
+import docutils
 from docutils.parsers.rst import Directive
 
 import qiime2
@@ -28,11 +28,20 @@ class MetaUsage(Enum):
     artifact_api = ArtifactAPIUsage()
 
 
-class UsageBlock(nodes.General, nodes.Element):
+class UsageNode(docutils.nodes.General, docutils.nodes.Element):
+    pass
+
+
+class UsageExampleNode(UsageNode):
     def __init__(self, titles=[], examples=[], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.titles = titles
         self.examples = examples
+
+
+class UsageInitDataNode(UsageNode):
+    def __init__(self):
+        super().__init__(*args, **kwargs)
 
 
 class UsageDirective(Directive):
@@ -40,13 +49,13 @@ class UsageDirective(Directive):
 
     def run(self):
         output = []
-        output.append(nodes.caption(text="Example"))
+        output.append(docutils.nodes.caption(text="Example"))
         code = "\n".join(self.content)
         env = self.state.document.settings.env
         if not hasattr(env, "usage_blocks"):
             env.usage_blocks = []
         env.usage_blocks.append({"code": code})
-        return [UsageBlock()]
+        return [UsageNode()]
 
 
 def visit_usage_node(self, node):
@@ -63,7 +72,7 @@ def depart_usage_node(self, node):
 
 def extract_blocks(doctree, env):
     blocks = []
-    tree = doctree.traverse(UsageBlock)
+    tree = doctree.traverse(UsageNode)
     for node, code in zip(tree, env.usage_blocks):
         blocks.append({"code": code["code"],
                        "nodes": []})
@@ -98,7 +107,7 @@ def process_usage_block(blocks, use):
 
 
 def update_nodes(doctree, blocks):
-    tree = doctree.traverse(UsageBlock)
+    tree = doctree.traverse(UsageNode)
     for block, tmp_node in zip(blocks, tree):
         nodes = block["nodes"]
         # Not sure if this check is necessary.
@@ -107,10 +116,10 @@ def update_nodes(doctree, blocks):
 
 
 @functools.singledispatch
-def records_to_nodes(use, records, prev_nodes) -> Union[List[nodes.Node],
+def records_to_nodes(use, records, prev_nodes) -> Union[List[docutils.nodes.Node],
                                                         list]:
     """Transform ScopeRecords into docutils Nodes."""
-    return [nodes.Node]
+    return [docutils.nodes.Node]
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
@@ -120,14 +129,14 @@ def execution(use, records, prev_nodes):
         source = record.source
         data = record.result
         if source == "init_data":
-            nodes_.append(nodes.title(text="Data"))
+            nodes_.append(docutils.nodes.title(text="Data"))
             data = str(data.type)
         elif source == "init_metadata":
-            nodes_.append(nodes.title(text="Metadata"))
+            nodes_.append(docutils.nodes.title(text="Metadata"))
             data = str(data.to_dataframe().head())
         else:
             return []
-        nodes_.append(nodes.literal_block(data, data))
+        nodes_.append(docutils.nodes.literal_block(data, data))
     return nodes_
 
 
@@ -139,7 +148,7 @@ def cli(use, records, prev_nodes):
         if source == "action":
             example = "".join(use.render())
             nodes_.append(
-                UsageBlock(titles=["Command Line"], examples=[example])
+                UsageExampleNode(titles=["Command Line"], examples=[example])
             )
             break
     return nodes_
@@ -177,5 +186,6 @@ def update_processed_records(new_records, processed_records):
 
 def setup(app):
     app.add_directive("usage", UsageDirective)
-    app.add_node(UsageBlock, html=(visit_usage_node, depart_usage_node))
+    app.add_node(UsageNode, html=(lambda *_: None, lambda *_: None))
+    app.add_node(UsageExampleNode, html=(visit_usage_node, depart_usage_node))
     app.connect("doctree-resolved", process_usage_blocks)
