@@ -8,6 +8,7 @@ from typing import List, Union, Tuple
 import jinja2
 import docutils
 from docutils.parsers.rst import Directive
+from sphinx.util.docutils import SphinxDirective
 
 import qiime2
 import qiime2.sdk.usage as usage
@@ -30,7 +31,9 @@ class MetaUsage(Enum):
 
 
 class UsageNode(docutils.nodes.General, docutils.nodes.Element):
-    pass
+    def __init__(self, factory=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.factory = factory
 
 
 class UsageExampleNode(UsageNode):
@@ -47,8 +50,9 @@ class UsageDataNode(UsageNode):
         self.setup = setup
 
 
-class UsageDirective(Directive):
+class UsageDirective(SphinxDirective):
     has_content = True
+    option_spec = {'factory': docutils.parsers.rst.directives.flag}
 
     def run(self):
         code = "\n".join(self.content)
@@ -56,7 +60,8 @@ class UsageDirective(Directive):
         if not hasattr(env, "usage_blocks"):
             env.usage_blocks = []
         env.usage_blocks.append({"code": code})
-        return [UsageNode()]
+        factory = "factory" in self.options
+        return [UsageNode(factory=factory)]
 
 
 def depart_example_node(self, node):
@@ -93,6 +98,10 @@ def process_usage_blocks(app, doctree, _):
     update_nodes(doctree, blocks)
 
 
+def factories_to_nodes(use, block):
+    pass
+
+
 def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
@@ -104,6 +113,7 @@ def process_usage_block(blocks, use):
         # TODO: validate the ast
         exec(source)
         new_records = get_new_records(use, processed_records)
+        factories_to_nodes(use, block)
         records_to_nodes(use, new_records, block)
         update_processed_records(new_records, processed_records)
 
@@ -130,19 +140,22 @@ def execution(use, records, block):
     for record in records:
         source = record.source
         result = record.result
-        title = record.ref
-        nodes.append(docutils.nodes.title(text=title))
+        ref = record.ref
+        nodes.append(docutils.nodes.title(text=ref))
+        setup = block["code"]
         if source == "init_data":
             preview = str(result.type)
-            setup = "setup"
+            setup += "setup"
         elif source == "init_metadata":
             preview = str(result.to_dataframe().head())
-            setup = "setup"
+            setup += "setup"
+        elif source not in ["action", "get_metadata_column"]:
+            return
         else:
             return []
         data_node = UsageDataNode(preview, setup)
         nodes.append(data_node)
-        nodes.append(download_node(title, title, title))
+        nodes.append(download_node(id_=ref, url=f"{ref}.com", saveas=ref))
     block["nodes"].extend(nodes)
 
 
@@ -195,4 +208,5 @@ def setup(app):
     app.add_node(UsageNode, html=(lambda *_: None, lambda *_: None))
     app.add_node(UsageExampleNode, html=(lambda *_: None, depart_example_node))
     app.add_node(UsageDataNode, html=(lambda *_: None, depart_data_node))
+    app.add_config_value('factory', False, 'html')
     app.connect("doctree-resolved", process_usage_blocks)

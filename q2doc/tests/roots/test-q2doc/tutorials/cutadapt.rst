@@ -10,6 +10,8 @@ Download and import data used in this tutorial
    stored in `data/` will get download blocks generated automatically.
 
 .. usage::
+   :factory:
+
     def data_factory():
         return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
                                     'data/forward.fastq.gz')
