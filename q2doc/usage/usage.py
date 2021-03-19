@@ -15,6 +15,7 @@ from qiime2.sdk.usage import ScopeRecord
 from qiime2 import Artifact, Metadata
 from qiime2.plugins import ArtifactAPIUsage
 from q2cli.core.usage import CLIUsage
+from q2doc.command_block.extension import download_node
 
 modules = (qiime2, usage, Artifact, Metadata)
 
@@ -39,17 +40,17 @@ class UsageExampleNode(UsageNode):
         self.examples = examples
 
 
-class UsageInitDataNode(UsageNode):
-    def __init__(self):
+class UsageDataNode(UsageNode):
+    def __init__(self, preview, setup, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.preview = preview
+        self.setup = setup
 
 
 class UsageDirective(Directive):
     has_content = True
 
     def run(self):
-        output = []
-        output.append(docutils.nodes.caption(text="Example"))
         code = "\n".join(self.content)
         env = self.state.document.settings.env
         if not hasattr(env, "usage_blocks"):
@@ -58,14 +59,17 @@ class UsageDirective(Directive):
         return [UsageNode()]
 
 
-def visit_usage_node(self, node):
-    pass
-
-
-def depart_usage_node(self, node):
+def depart_example_node(self, node):
     if not node.titles:
         return
-    template = jinja_env.get_template("usage.html")
+    template = jinja_env.get_template("example.html")
+    rendered = template.render(node=node)
+    self.body.append(rendered)
+
+
+def depart_data_node(self, node):
+    template = jinja_env.get_template("data.html")
+    node.id = self.document.settings.env.new_serialno('data_node')
     rendered = template.render(node=node)
     self.body.append(rendered)
 
@@ -93,7 +97,6 @@ def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
     for block in blocks:
-        nodes = block["nodes"]
         # Grab code in the current block and execute it.
         code = block["code"]
         tree = ast.parse(code)
@@ -101,8 +104,7 @@ def process_usage_block(blocks, use):
         # TODO: validate the ast
         exec(source)
         new_records = get_new_records(use, processed_records)
-        nodes = records_to_nodes(use, new_records, nodes)
-        block["nodes"].extend(nodes)
+        records_to_nodes(use, new_records, block)
         update_processed_records(new_records, processed_records)
 
 
@@ -123,49 +125,53 @@ def records_to_nodes(use, records, prev_nodes) -> Union[List[docutils.nodes.Node
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
-def execution(use, records, prev_nodes):
-    nodes_ = []
+def execution(use, records, block):
+    nodes = []
     for record in records:
         source = record.source
-        data = record.result
+        result = record.result
+        title = record.ref
+        nodes.append(docutils.nodes.title(text=title))
         if source == "init_data":
-            nodes_.append(docutils.nodes.title(text="Data"))
-            data = str(data.type)
+            preview = str(result.type)
+            setup = "setup"
         elif source == "init_metadata":
-            nodes_.append(docutils.nodes.title(text="Metadata"))
-            data = str(data.to_dataframe().head())
+            preview = str(result.to_dataframe().head())
+            setup = "setup"
         else:
             return []
-        nodes_.append(docutils.nodes.literal_block(data, data))
-    return nodes_
+        data_node = UsageDataNode(preview, setup)
+        nodes.append(data_node)
+        nodes.append(download_node(title, title, title))
+    block["nodes"].extend(nodes)
 
 
 @records_to_nodes.register(CLIUsage)
-def cli(use, records, prev_nodes):
-    nodes_ = []
+def cli(use, records, block):
+    nodes = []
     for record in records:
         source = record.source
         if source == "action":
             example = "".join(use.render())
-            nodes_.append(
+            nodes.append(
                 UsageExampleNode(titles=["Command Line"], examples=[example])
             )
             break
-    return nodes_
+    block["nodes"].extend(nodes)
 
 
 @records_to_nodes.register(ArtifactAPIUsage)
-def artifact_api(use, records, prev_nodes):
-    nodes_ = []
+def artifact_api(use, records, block):
+    nodes = []
     for record in records:
         source = record.source
         if source == "action":
-            node = prev_nodes[0]
+            node = block["nodes"][0]
             example = use.render()
             node.titles.append("Artifact API")
             node.examples.append(example)
             break
-    return nodes_
+    block["nodes"].extend(nodes)
 
 
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
@@ -187,5 +193,6 @@ def update_processed_records(new_records, processed_records):
 def setup(app):
     app.add_directive("usage", UsageDirective)
     app.add_node(UsageNode, html=(lambda *_: None, lambda *_: None))
-    app.add_node(UsageExampleNode, html=(visit_usage_node, depart_usage_node))
+    app.add_node(UsageExampleNode, html=(lambda *_: None, depart_example_node))
+    app.add_node(UsageDataNode, html=(lambda *_: None, depart_data_node))
     app.connect("doctree-resolved", process_usage_blocks)
