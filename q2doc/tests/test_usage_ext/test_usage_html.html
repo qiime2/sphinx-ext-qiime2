@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Download and import data used in this tutorial &#8212; QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</title>
+    <title>Cutadapt Tutorial &#8212; QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -14,6 +14,7 @@
     <script src="../../_static/external-links.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="“Moving Pictures” tutorial" href="../moving-pictures/" />
     <link rel="prev" title="Tutorials" href="../" />
   <script src="../../_static/bootstrap.min.js"></script>
   <script src="../../_static/clipboard.min.js"></script>
@@ -52,33 +53,227 @@
       
       <div id="body" class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main pull-right">
         
-  <div class="section" id="download-and-import-data-used-in-this-tutorial">
-<h1>Download and import data used in this tutorial<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="cutadapt-tutorial">
+<h1>Cutadapt Tutorial<a class="headerlink" href="#cutadapt-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="download-and-import-data-used-in-this-tutorial">
+<h2>Download and import data used in this tutorial<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>the <cite>forward.fastq.gz</cite> and <cite>metadata.tsv</cite> files will be stored under
 the <cite>data/</cite> dir, which will be the extent of the data scope. Everything
 stored in <cite>data/</cite> will get download blocks generated automatically.</p>
 </div>
-<h1>Data<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MultiplexedSingleEndBarcodeInSequence</span>
-</pre></div>
-</div>
-<h1>Metadata<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>               <span class="n">barcodes</span>
-<span class="n">sample</span><span class="o">-</span><span class="nb">id</span>              
-<span class="n">L1S8</span>       <span class="n">AGCTGACTAGTC</span>
-<span class="n">L1S57</span>      <span class="n">ACACACTATGGC</span>
-<span class="n">L1S76</span>      <span class="n">ACTACGTGTGGT</span>
-<span class="n">L1S105</span>     <span class="n">AGTGCGATGCGT</span>
-<span class="n">L2S155</span>     <span class="n">ACGATGCGACCA</span>
-</pre></div>
-</div>
-<p>The data here consists of single-end reads (6 reads total). There are two
+<h2>data<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#preview-0" aria-controls="preview-0" role="tab" data-toggle="tab">
+                    Preview
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#artifact-api-0" aria-controls="artifact-api-0" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="preview-0">
+                <p>
+                    <strong>Preview</strong>
+
+                <div class="highlight">
+                    <pre>MultiplexedSingleEndBarcodeInSequence</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="artifact-api-0">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>setup</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div><div class="tabbed panel panel-default">
+  <div class="panel-heading white-bg">
+    Please select a download option that is most appropriate for your environment:
+  </div>
+
+  <div class="panel-body">
+    <ul class="nav nav-tabs gray-bg" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#browser-data" aria-controls="browser-data" role="tab" data-toggle="tab">
+          Browser
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#wget-data" aria-controls="wget-data" role="tab" data-toggle="tab">
+          wget
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#curl-data" aria-controls="messages-data" role="tab" data-toggle="tab">
+          curl
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade in active" id="browser-data">
+        <p>
+          <strong>Download URL:</strong> <a href="data">
+            data
+          </a>
+        </p>
+        <p>
+          <strong>Save as:</strong> data
+        </p>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="wget-data">
+        <div class="clearfix"></div>
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>wget \
+  -O "data" \
+  "data"</pre>
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="curl-data">
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>curl -sL \
+  "data" > \
+  "data"</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><h2>metadata<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#preview-1" aria-controls="preview-1" role="tab" data-toggle="tab">
+                    Preview
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#artifact-api-1" aria-controls="artifact-api-1" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="preview-1">
+                <p>
+                    <strong>Preview</strong>
+
+                <div class="highlight">
+                    <pre>               barcodes
+sample-id              
+L1S8       AGCTGACTAGTC
+L1S57      ACACACTATGGC
+L1S76      ACTACGTGTGGT
+L1S105     AGTGCGATGCGT
+L2S155     ACGATGCGACCA</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="artifact-api-1">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>setup</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div><div class="tabbed panel panel-default">
+  <div class="panel-heading white-bg">
+    Please select a download option that is most appropriate for your environment:
+  </div>
+
+  <div class="panel-body">
+    <ul class="nav nav-tabs gray-bg" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#browser-metadata" aria-controls="browser-metadata" role="tab" data-toggle="tab">
+          Browser
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#wget-metadata" aria-controls="wget-metadata" role="tab" data-toggle="tab">
+          wget
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#curl-metadata" aria-controls="messages-metadata" role="tab" data-toggle="tab">
+          curl
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade in active" id="browser-metadata">
+        <p>
+          <strong>Download URL:</strong> <a href="metadata">
+            metadata
+          </a>
+        </p>
+        <p>
+          <strong>Save as:</strong> metadata
+        </p>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="wget-metadata">
+        <div class="clearfix"></div>
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>wget \
+  -O "metadata" \
+  "metadata"</pre>
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="curl-metadata">
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>curl -sL \
+  "metadata" > \
+  "metadata"</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><p>The data here consists of single-end reads (6 reads total). There are two
 samples present in the data, with the following barcodes on the 5’ end:</p>
 </div>
 <div class="section" id="demultiplex-the-reads">
-<h1>Demultiplex the reads<a class="headerlink" href="#demultiplex-the-reads" title="Permalink to this headline">¶</a></h1>
+<h2>Demultiplex the reads<a class="headerlink" href="#demultiplex-the-reads" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have everything imported, let’s do the thing:</p>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -140,6 +335,7 @@ demultiplexed_seqs, untrimmed = demux_single(
     </div>
 </div><p>As you can see - the reads are now demuxed. Enjoy!</p>
 </div>
+</div>
 
 
       </div>
@@ -155,8 +351,8 @@ demultiplexed_seqs, untrimmed = demux_single(
 <h3><a href="../../">Table of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Download and import data used in this tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#demultiplex-the-reads">Demultiplex the reads</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cutadapt Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../moving-pictures/">“Moving Pictures” tutorial</a></li>
 </ul>
 </li>
 </ul>
