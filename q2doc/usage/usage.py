@@ -1,28 +1,18 @@
 import ast
-import os
-import operator
 import functools
-from enum import Enum
-from typing import Union, Tuple
+import operator
+import os
+from typing import Tuple, Union
 
 import docutils
-
 import qiime2
 import qiime2.sdk.usage as usage
-from q2doc.usage.directive import UsageNode, UsageExampleNode, UsageDataNode
-from qiime2.sdk.usage import ScopeRecord
-from qiime2 import Artifact, Metadata
-from qiime2.plugins import ArtifactAPIUsage
 from q2cli.core.usage import CLIUsage
 from q2doc.command_block.extension import download_node
-
-modules = (qiime2, usage, Artifact, Metadata)
-
-
-class MetaUsage(Enum):
-    execution = usage.ExecutionUsage()
-    cli = CLIUsage()
-    artifact_api = ArtifactAPIUsage()
+from q2doc.usage.directive import UsageDataNode, UsageExampleNode, UsageNode
+from q2doc.usage.meta_usage import MetaUsage
+from qiime2.plugins import ArtifactAPIUsage
+from qiime2.sdk.usage import ScopeRecord
 
 
 def extract_blocks(doctree, env):
@@ -31,16 +21,6 @@ def extract_blocks(doctree, env):
     for node, code in zip(tree, env.usage_blocks):
         blocks.append({"code": code["code"], "nodes": [node]})
     return blocks
-
-
-def process_usage_blocks(app, doctree, _):
-    env = app.builder.env
-    os.chdir(env.srcdir)
-    blocks = extract_blocks(doctree, env)
-    for use in MetaUsage:
-        use = use.value
-        process_usage_block(blocks, use)
-    update_nodes(doctree, blocks)
 
 
 def process_usage_block(blocks, use):
@@ -59,6 +39,16 @@ def process_usage_block(blocks, use):
         update_processed_records(new_records, processed_records)
 
 
+def process_usage_blocks(app, doctree, _):
+    env = app.builder.env
+    os.chdir(env.srcdir)
+    blocks = extract_blocks(doctree, env)
+    for use in MetaUsage:
+        use = use.value
+        process_usage_block(blocks, use)
+    update_nodes(doctree, blocks)
+
+
 def update_nodes(doctree, blocks):
     tree = doctree.traverse(UsageNode)
     for block, tmp_node in zip(blocks, tree):
@@ -68,11 +58,19 @@ def update_nodes(doctree, blocks):
             tmp_node.replace_self(nodes)
 
 
-class FuncVisitor(ast.NodeVisitor):
-    names = []
+def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
+    """Select records from the Usage driver's Scope that we haven't seen yet."""
+    records = use._get_records()
+    new_records = [k for k in records.keys() if k not in processed_records]
+    records = (
+        operator.itemgetter(*new_records)(records) if new_records else tuple()
+    )
+    return records
 
-    def visit_FunctionDef(self, node: ast.FunctionDef):
-        self.names.append(node.name)
+
+def update_processed_records(new_records, processed_records):
+    refs = [i.ref for i in new_records]
+    processed_records.extend(refs)
 
 
 def factories_to_nodes(block):
@@ -89,10 +87,30 @@ def factories_to_nodes(block):
     block["nodes"] = nodes
 
 
+class FuncVisitor(ast.NodeVisitor):
+    names = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        self.names.append(node.name)
+
+
+def data_preview(record):
+    result = record.result
+    if record.source == "init_data":
+        setup = "TODO Driver specific setup"
+        semantic_type = str(result.type)
+        preview = str(result.type)
+    elif record.source == "init_metadata":
+        setup = "TODO Driver specific setup"
+        semantic_type = "Metadata"
+        preview = str(result.to_dataframe().head())
+    node = UsageDataNode(semantic_type, preview, setup)
+    return node
+
+
 @functools.singledispatch
 def records_to_nodes(use, records, prev_nodes) -> None:
     """Transform ScopeRecords into docutils Nodes."""
-    pass
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
@@ -101,21 +119,14 @@ def execution(use, records, block):
     if block["nodes"][0].factory:
         factories_to_nodes(block)
     for record in records:
-        source = record.source
-        result = record.result
-        ref = record.ref
-        nodes.append(docutils.nodes.title(text=ref))
-        setup = block["code"]
-        if source == "init_data":
-            preview = str(result.type)
-        elif source == "init_metadata":
-            preview = str(result.to_dataframe().head())
-        elif source not in ["action", "get_metadata_column"]:
-            return
+        nodes.append(docutils.nodes.title(text=record.ref))
+        if record.source in ["init_data", "init_metadata"]:
+            data_node = data_preview(record)
+            nodes.append(data_node)
+        elif record.source not in ["action", "get_metadata_column"]:
+            return []
         else:
             return []
-        data_node = UsageDataNode(preview, setup)
-        nodes.append(data_node)
     block["nodes"].extend(nodes)
 
 
@@ -145,18 +156,3 @@ def artifact_api(use, records, block):
             node.examples.append(example)
             break
     block["nodes"].extend(nodes)
-
-
-def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
-    """Select records from the Usage driver's Scope that we haven't seen yet."""
-    records = use._get_records()
-    new_records = [k for k in records.keys() if k not in processed_records]
-    records = (
-        operator.itemgetter(*new_records)(records) if new_records else tuple()
-    )
-    return records
-
-
-def update_processed_records(new_records, processed_records):
-    refs = [i.ref for i in new_records]
-    processed_records.extend(refs)

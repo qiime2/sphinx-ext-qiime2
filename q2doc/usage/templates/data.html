@@ -20,7 +20,7 @@
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane fade in active" id="preview-{{ node.id }}">
                 <p>
-                    <strong>Preview</strong>
+                    <strong>{{ node.semantic_type }} Preview</strong>
 
                 <div class="highlight">
                     <pre>{{ node.preview }}</pre>
@@ -29,7 +29,7 @@
             </div>
             <div role="tabpanel" class="tab-pane fade" id="artifact-api-{{ node.id }}">
                 <p>
-                    <strong>Artifact API</strong>
+                    <strong>{{ node.semantic_type }} setup</strong>
 
                 <div class="highlight">
                     <pre>{{ node.setup }}</pre>

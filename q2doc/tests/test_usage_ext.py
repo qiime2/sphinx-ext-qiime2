@@ -8,7 +8,8 @@ from docutils import nodes
 import qiime2
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
-from q2doc.usage.usage import MetaUsage, get_new_records, records_to_nodes
+from q2doc.usage.usage import get_new_records, records_to_nodes
+from q2doc.usage.meta_usage import MetaUsage
 from qiime2.plugins import ArtifactAPIUsage
 
 DATA = pathlib.Path(__file__).parent / "roots" / "test-q2doc" / "data"

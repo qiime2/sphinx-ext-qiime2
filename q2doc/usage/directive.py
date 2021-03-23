@@ -21,8 +21,9 @@ class UsageExampleNode(UsageNode):
 
 
 class UsageDataNode(UsageNode):
-    def __init__(self, preview, setup, *args, **kwargs):
+    def __init__(self, semantic_type, preview, setup, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.semantic_type = semantic_type
         self.preview = preview
         self.setup = setup
 
