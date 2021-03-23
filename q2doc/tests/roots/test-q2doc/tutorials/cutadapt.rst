@@ -12,12 +12,12 @@ Download and import data used in this tutorial
 .. usage::
    :factory:
 
-    def data_factory():
-        return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
-                                    'data/forward.fastq.gz')
-    
-    def metadata_factory():
-        return qiime2.Metadata.load('data/metadata.tsv')
+   def data_factory():
+       return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
+                                   'data/forward.fastq.gz')
+
+   def metadata_factory():
+       return qiime2.Metadata.load('data/metadata.tsv')
 
 
 The data here consists of single-end reads (6 reads total). There are two

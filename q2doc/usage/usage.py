@@ -84,7 +84,7 @@ def extract_blocks(doctree, env):
     tree = doctree.traverse(UsageNode)
     for node, code in zip(tree, env.usage_blocks):
         blocks.append({"code": code["code"],
-                       "nodes": []})
+                       "nodes": [node]})
     return blocks
 
 
@@ -98,10 +98,6 @@ def process_usage_blocks(app, doctree, _):
     update_nodes(doctree, blocks)
 
 
-def factories_to_nodes(use, block):
-    pass
-
-
 def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
@@ -109,11 +105,11 @@ def process_usage_block(blocks, use):
         # Grab code in the current block and execute it.
         code = block["code"]
         tree = ast.parse(code)
+        block["tree"] = tree
         source = compile(tree, filename="<ast>", mode="exec")
         # TODO: validate the ast
         exec(source)
         new_records = get_new_records(use, processed_records)
-        factories_to_nodes(use, block)
         records_to_nodes(use, new_records, block)
         update_processed_records(new_records, processed_records)
 
@@ -127,11 +123,20 @@ def update_nodes(doctree, blocks):
             tmp_node.replace_self(nodes)
 
 
+def factories_to_nodes(block):
+    nodes = []
+    # TODO Call factories and save results
+    ref = "ref"
+    node = block["nodes"][0]
+    if node.factory:
+        nodes.append(download_node(id_=ref, url=f"{ref}.com", saveas=ref))
+    block["nodes"] = nodes
+
+
 @functools.singledispatch
-def records_to_nodes(use, records, prev_nodes) -> Union[List[docutils.nodes.Node],
-                                                        list]:
+def records_to_nodes(use, records, prev_nodes) -> None:
     """Transform ScopeRecords into docutils Nodes."""
-    return [docutils.nodes.Node]
+    pass
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
@@ -155,8 +160,8 @@ def execution(use, records, block):
             return []
         data_node = UsageDataNode(preview, setup)
         nodes.append(data_node)
-        nodes.append(download_node(id_=ref, url=f"{ref}.com", saveas=ref))
     block["nodes"].extend(nodes)
+    factories_to_nodes(block)
 
 
 @records_to_nodes.register(CLIUsage)
@@ -179,7 +184,7 @@ def artifact_api(use, records, block):
     for record in records:
         source = record.source
         if source == "action":
-            node = block["nodes"][0]
+            node = block["nodes"][1]
             example = use.render()
             node.titles.append("Artifact API")
             node.examples.append(example)
