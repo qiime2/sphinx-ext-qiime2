@@ -3,15 +3,13 @@ import os
 import operator
 import functools
 from enum import Enum
-from typing import List, Union, Tuple
+from typing import Union, Tuple
 
-import jinja2
 import docutils
-from docutils.parsers.rst import Directive
-from sphinx.util.docutils import SphinxDirective
 
 import qiime2
 import qiime2.sdk.usage as usage
+from q2doc.usage.directive import UsageNode, UsageExampleNode, UsageDataNode
 from qiime2.sdk.usage import ScopeRecord
 from qiime2 import Artifact, Metadata
 from qiime2.plugins import ArtifactAPIUsage
@@ -20,9 +18,6 @@ from q2doc.command_block.extension import download_node
 
 modules = (qiime2, usage, Artifact, Metadata)
 
-loader = jinja2.PackageLoader("q2doc.usage", "templates")
-jinja_env = jinja2.Environment(loader=loader)
-
 
 class MetaUsage(Enum):
     execution = usage.ExecutionUsage()
@@ -30,61 +25,11 @@ class MetaUsage(Enum):
     artifact_api = ArtifactAPIUsage()
 
 
-class UsageNode(docutils.nodes.General, docutils.nodes.Element):
-    def __init__(self, factory=False, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.factory = factory
-
-
-class UsageExampleNode(UsageNode):
-    def __init__(self, titles=[], examples=[], *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.titles = titles
-        self.examples = examples
-
-
-class UsageDataNode(UsageNode):
-    def __init__(self, preview, setup, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.preview = preview
-        self.setup = setup
-
-
-class UsageDirective(SphinxDirective):
-    has_content = True
-    option_spec = {'factory': docutils.parsers.rst.directives.flag}
-
-    def run(self):
-        code = "\n".join(self.content)
-        env = self.state.document.settings.env
-        if not hasattr(env, "usage_blocks"):
-            env.usage_blocks = []
-        env.usage_blocks.append({"code": code})
-        factory = "factory" in self.options
-        return [UsageNode(factory=factory)]
-
-
-def depart_example_node(self, node):
-    if not node.titles:
-        return
-    template = jinja_env.get_template("example.html")
-    rendered = template.render(node=node)
-    self.body.append(rendered)
-
-
-def depart_data_node(self, node):
-    template = jinja_env.get_template("data.html")
-    node.id = self.document.settings.env.new_serialno('data_node')
-    rendered = template.render(node=node)
-    self.body.append(rendered)
-
-
 def extract_blocks(doctree, env):
     blocks = []
     tree = doctree.traverse(UsageNode)
     for node, code in zip(tree, env.usage_blocks):
-        blocks.append({"code": code["code"],
-                       "nodes": [node]})
+        blocks.append({"code": code["code"], "nodes": [node]})
     return blocks
 
 
@@ -138,7 +83,9 @@ def factories_to_nodes(block):
     visitor = FuncVisitor()
     visitor.visit(tree)
     for name in visitor.names:
-        nodes.append(download_node(id_=name, url=f"{base}/{name}", saveas=name))
+        nodes.append(
+            download_node(id_=name, url=f"{base}/{name}", saveas=name)
+        )
     block["nodes"] = nodes
 
 
@@ -201,8 +148,7 @@ def artifact_api(use, records, block):
 
 
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
-    """Select records from the Usage driver's Scope that we haven't seen yet.
-    """
+    """Select records from the Usage driver's Scope that we haven't seen yet."""
     records = use._get_records()
     new_records = [k for k in records.keys() if k not in processed_records]
     records = (
@@ -214,12 +160,3 @@ def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
 def update_processed_records(new_records, processed_records):
     refs = [i.ref for i in new_records]
     processed_records.extend(refs)
-
-
-def setup(app):
-    app.add_directive("usage", UsageDirective)
-    app.add_node(UsageNode, html=(lambda *_: None, lambda *_: None))
-    app.add_node(UsageExampleNode, html=(lambda *_: None, depart_example_node))
-    app.add_node(UsageDataNode, html=(lambda *_: None, depart_data_node))
-    app.add_config_value('factory', False, 'html')
-    app.connect("doctree-resolved", process_usage_blocks)

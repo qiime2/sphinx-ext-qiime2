@@ -9,7 +9,7 @@ Download and import data used in this tutorial
    the `data/` dir, which will be the extent of the data scope. Everything
    stored in `data/` will get download blocks generated automatically.
 
-First, we declare data needed by the following usage example. This will render download elements.  At this point,
+First, we declare data needed by the usage example that follows. This will render download elements.  At this point,
 we don't mention anything driver-specific - just get the data.
 
 .. usage::
