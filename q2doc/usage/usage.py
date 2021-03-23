@@ -123,13 +123,22 @@ def update_nodes(doctree, blocks):
             tmp_node.replace_self(nodes)
 
 
+class FuncVisitor(ast.NodeVisitor):
+    names = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        self.names.append(node.name)
+
+
 def factories_to_nodes(block):
     nodes = []
     # TODO Call factories and save results
-    ref = "ref"
-    node = block["nodes"][0]
-    if node.factory:
-        nodes.append(download_node(id_=ref, url=f"{ref}.com", saveas=ref))
+    base = "https://library.qiime2.org"
+    tree = block["tree"]
+    visitor = FuncVisitor()
+    visitor.visit(tree)
+    for name in visitor.names:
+        nodes.append(download_node(id_=name, url=f"{base}/{name}", saveas=name))
     block["nodes"] = nodes
 
 
@@ -142,6 +151,8 @@ def records_to_nodes(use, records, prev_nodes) -> None:
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block):
     nodes = []
+    if block["nodes"][0].factory:
+        factories_to_nodes(block)
     for record in records:
         source = record.source
         result = record.result
@@ -150,10 +161,8 @@ def execution(use, records, block):
         setup = block["code"]
         if source == "init_data":
             preview = str(result.type)
-            setup += "setup"
         elif source == "init_metadata":
             preview = str(result.to_dataframe().head())
-            setup += "setup"
         elif source not in ["action", "get_metadata_column"]:
             return
         else:
@@ -161,7 +170,6 @@ def execution(use, records, block):
         data_node = UsageDataNode(preview, setup)
         nodes.append(data_node)
     block["nodes"].extend(nodes)
-    factories_to_nodes(block)
 
 
 @records_to_nodes.register(CLIUsage)

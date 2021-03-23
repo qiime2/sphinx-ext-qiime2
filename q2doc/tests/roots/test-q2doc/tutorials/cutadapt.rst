@@ -9,12 +9,14 @@ Download and import data used in this tutorial
    the `data/` dir, which will be the extent of the data scope. Everything
    stored in `data/` will get download blocks generated automatically.
 
+First, we declare data needed by the following usage example. This will render download elements.  At this point,
+we don't mention anything driver-specific - just get the data.
+
 .. usage::
    :factory:
 
    def data_factory():
-       return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence',
-                                   'data/forward.fastq.gz')
+       return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence', 'data/forward.fastq.gz')
 
    def metadata_factory():
        return qiime2.Metadata.load('data/metadata.tsv')
