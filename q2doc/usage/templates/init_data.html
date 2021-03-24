@@ -1,0 +1,30 @@
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#artifact-api-{{ node.id }}" aria-controls="artifact-api-{{ node.id }}" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="artifact-api-{{ node.id }}">
+                <p>
+                    <strong>{{ node.semantic_type }} setup</strong>
+
+                <div class="highlight">
+                    <pre>{{ node.setup }}</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,7 +9,12 @@ import qiime2
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
 from q2doc.command_block.extension import download_node
-from q2doc.usage.directive import UsageDataNode, UsageExampleNode, UsageNode
+from q2doc.usage.nodes import (
+    UsageNode,
+    UsageExampleNode,
+    UsageDataNode,
+    UsageMetadataNode,
+)
 from q2doc.usage.meta_usage import MetaUsage
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
@@ -99,12 +104,12 @@ def data_preview(record):
     if record.source == "init_data":
         setup = "TODO Driver specific setup"
         semantic_type = str(result.type)
-        preview = str(result.type)
+        node = UsageDataNode(semantic_type, setup)
     elif record.source == "init_metadata":
         setup = "TODO Driver specific setup"
         semantic_type = "Metadata"
         preview = str(result.to_dataframe().head())
-    node = UsageDataNode(semantic_type, preview, setup)
+        node = UsageMetadataNode(semantic_type, setup, preview)
     return node
 
 
