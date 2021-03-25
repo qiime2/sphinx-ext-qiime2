@@ -28,12 +28,25 @@ def extract_blocks(doctree, env):
     return blocks
 
 
+def factory_factory(content):
+    return
+
+
+def parse_content(block):
+    content = block["code"]
+    factory = getattr(block["nodes"][0], "factory")
+    if factory:
+        code = factory_factory(content)
+        return code
+    return block["code"]
+
+
 def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
     for block in blocks:
         # Grab code in the current block and execute it.
-        code = block["code"]
+        code = parse_content(block)
         tree = ast.parse(code)
         block["tree"] = tree
         source = compile(tree, filename="<ast>", mode="exec")
@@ -99,20 +112,6 @@ class FuncVisitor(ast.NodeVisitor):
         self.names.append(node.name)
 
 
-def data_preview(record):
-    result = record.result
-    if record.source == "init_data":
-        setup = "TODO Driver specific setup"
-        semantic_type = str(result.type)
-        node = UsageDataNode(semantic_type, setup)
-    elif record.source == "init_metadata":
-        setup = "TODO Driver specific setup"
-        semantic_type = "Metadata"
-        preview = str(result.to_dataframe().head())
-        node = UsageMetadataNode(semantic_type, setup, preview)
-    return node
-
-
 @functools.singledispatch
 def records_to_nodes(use, records, prev_nodes) -> None:
     """Transform ScopeRecords into docutils Nodes."""
@@ -123,15 +122,15 @@ def execution(use, records, block):
     nodes = []
     if block["nodes"][0].factory:
         factories_to_nodes(block)
-    for record in records:
-        nodes.append(docutils.nodes.title(text=record.ref))
-        if record.source in ["init_data", "init_metadata"]:
-            data_node = data_preview(record)
-            nodes.append(data_node)
-        elif record.source not in ["action", "get_metadata_column"]:
-            return []
-        else:
-            return []
+    # for record in records:
+        # nodes.append(docutils.nodes.title(text=record.ref))
+        # if record.source == "init_metadata":
+        #     metadata_node = metadata_preview(record)
+        #     nodes.append(metadata_node)
+        # elif record.source not in ["action", "get_metadata_column"]:
+        #     return []
+        # else:
+        #     return []
     block["nodes"].extend(nodes)
 
 
@@ -152,6 +151,7 @@ def cli(use, records, block):
 @records_to_nodes.register(ArtifactAPIUsage)
 def artifact_api(use, records, block):
     nodes = []
+    example_data = use.get_example_data()
     for record in records:
         source = record.source
         if source == "action":
@@ -160,4 +160,35 @@ def artifact_api(use, records, block):
             node.titles.append("Artifact API")
             node.examples.append(example)
             break
+        elif source == "init_data":
+            # TODO Keep track of which example data we've seen?
+            nodes.append(docutils.nodes.title(text="Artifact"))
+            data_node = init_data_node(record, example_data)
+            nodes.append(data_node)
+        elif source == "init_metadata":
+            nodes.append(docutils.nodes.title(text="Metadata"))
+            metadata_node = init_metadata_node(record, example_data)
+            nodes.append(metadata_node)
     block["nodes"].extend(nodes)
+
+
+def init_data_node(record, example_data):
+    artifact = example_data[record.ref]
+    setup = artifact_api_setup(artifact)
+    semantic_type = f"{artifact.type}"
+    node = UsageDataNode(semantic_type, setup)
+    return node
+
+
+def artifact_api_setup(data):
+    setup = "Artifact API setup"
+    return setup
+
+
+def init_metadata_node(record, example_data):
+    metadata = example_data[record.ref]
+    setup = artifact_api_setup(metadata)
+    semantic_type = "Metadata"
+    preview = str(metadata.to_dataframe().head())
+    node = UsageMetadataNode(semantic_type, setup, preview)
+    return node
