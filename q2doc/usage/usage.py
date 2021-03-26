@@ -5,6 +5,8 @@ import os
 from typing import Tuple, Union
 
 import docutils
+import yaml
+
 import qiime2
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
@@ -20,6 +22,9 @@ from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
 
 
+context = {}
+
+
 def extract_blocks(doctree, env):
     blocks = []
     tree = doctree.traverse(UsageNode)
@@ -28,16 +33,38 @@ def extract_blocks(doctree, env):
     return blocks
 
 
-def factory_factory(content):
-    return
+def factory_factory(block):
+    content = block["code"]
+    factories = yaml.load(content, Loader=yaml.SafeLoader)
+    validate_factories(factories)
+    for factory_type, factory in factories.items():
+        if factory_type == 'data':
+            code = 'qiime2.Artifact.import_data("{}", "{}")'
+            name, semantic_type, path = factory.values()
+            path = os.path.join('data', path)
+            code = code.format(semantic_type, path)
+        elif factory_type == 'metadata':
+            code = 'qiime2.Metadata.load("{}")'
+            name, path = factory.values()
+            path = os.path.join('data', path)
+            code = code.format(path)
+        else:
+            raise Exception()
+        context[name] = f"{name} = {code}\n"
+        yield f"def {name}():\n    return {code}"
+
+
+def validate_factories(factories):
+    pass
 
 
 def parse_content(block):
-    content = block["code"]
-    factory = getattr(block["nodes"][0], "factory")
+    node = block["nodes"][0]
+    factory = getattr(node, "factory", "")
     if factory:
-        code = factory_factory(content)
-        return code
+        block["setup"] = ""
+        code = factory_factory(block)
+        return "\n".join(code)
     return block["code"]
 
 
@@ -102,7 +129,7 @@ def factories_to_nodes(block):
         nodes.append(
             download_node(id_=name, url=f"{base}/{name}", saveas=name)
         )
-    block["nodes"] = nodes
+    block["nodes"].extend(nodes)
 
 
 class FuncVisitor(ast.NodeVisitor):
@@ -174,7 +201,7 @@ def artifact_api(use, records, block):
 
 def init_data_node(record, example_data):
     artifact = example_data[record.ref]
-    setup = artifact_api_setup(artifact)
+    setup = context[record.ref]
     semantic_type = f"{artifact.type}"
     node = UsageDataNode(semantic_type, setup)
     return node
@@ -187,7 +214,7 @@ def artifact_api_setup(data):
 
 def init_metadata_node(record, example_data):
     metadata = example_data[record.ref]
-    setup = artifact_api_setup(metadata)
+    setup = context[record.ref]
     semantic_type = "Metadata"
     preview = str(metadata.to_dataframe().head())
     node = UsageMetadataNode(semantic_type, setup, preview)
