@@ -15,19 +15,22 @@ we don't mention anything driver-specific - just get the data.
 .. usage::
    :factory:
 
-   def data_factory():
-       return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence', 'data/forward.fastq.gz')
+   data:
+     name: data
+     type: MultiplexedSingleEndBarcodeInSequence
+     path: forward.fastq.gz
 
-   def metadata_factory():
-       return qiime2.Metadata.load('data/metadata.tsv')
+   metadata:
+     name: metadata
+     path: metadata.tsv
 
 
 The data here consists of single-end reads (6 reads total). There are two
 samples present in the data, with the following barcodes on the 5' end:
 
 .. usage::
-    data = use.init_data('data', data_factory)
-    metadata = use.init_metadata('metadata', metadata_factory)
+    data = use.init_data('data', data)
+    metadata = use.init_metadata('metadata', metadata)
 
 
 Demultiplex the reads
