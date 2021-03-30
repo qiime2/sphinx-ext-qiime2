@@ -42,9 +42,8 @@ class UsageDataNode(UsageNode):
 
 
 class UsageMetadataNode(UsageNode):
-    def __init__(self, semantic_type, setup, preview, *args, **kwargs):
+    def __init__(self, setup, preview, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.semantic_type = semantic_type
         self.preview = preview
         self.setup = setup
 
