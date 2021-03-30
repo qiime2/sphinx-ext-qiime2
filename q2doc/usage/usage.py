@@ -24,11 +24,11 @@ from qiime2.sdk.usage import ScopeRecord
 context = {}
 
 
-def process_usage_block(blocks, use):
+def process_usage_block(use, env):
     # Use a list to preserve the order
     processed_records = []
-    for block in blocks:
-        tree = ast.parse(code)
+    for block in env.usage_blocks:
+        tree = ast.parse(block['code'])
         block["tree"] = tree
         source = compile(tree, filename="<ast>", mode="exec")
         # TODO: validate the ast
@@ -43,17 +43,15 @@ def process_usage_blocks(app, doctree, _):
     os.chdir(env.srcdir)
     for use in MetaUsage:
         use = use.value
-        process_usage_block(blocks, use)
-    update_nodes(doctree, blocks)
+        process_usage_block(use, env)
+    update_nodes(doctree, env)
 
 
-def update_nodes(doctree, blocks):
+def update_nodes(doctree, env):
     tree = doctree.traverse(UsageNode)
-    for block, tmp_node in zip(blocks, tree):
+    for block, tmp_node in zip(env.usage_blocks, tree):
         nodes = block["nodes"]
-        # Not sure if this check is necessary.
-        if nodes:
-            tmp_node.replace_self(nodes)
+        tmp_node.replace_self(nodes)
 
 
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
