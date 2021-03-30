@@ -5,7 +5,6 @@ import os
 from typing import Tuple, Union
 
 import docutils
-import yaml
 
 import qiime2
 import qiime2.sdk.usage as usage
@@ -23,31 +22,6 @@ from qiime2.sdk.usage import ScopeRecord
 
 
 context = {}
-
-
-def factory_factory(block):
-    content = block["code"]
-    factories = yaml.load(content, Loader=yaml.SafeLoader)
-    validate_factories(factories)
-    for factory_type, factory in factories.items():
-        if factory_type == 'data':
-            code = 'qiime2.Artifact.import_data("{}", "{}")'
-            name, semantic_type, path = factory.values()
-            path = os.path.join('data', path)
-            code = code.format(semantic_type, path)
-        elif factory_type == 'metadata':
-            code = 'qiime2.Metadata.load("{}")'
-            name, path = factory.values()
-            path = os.path.join('data', path)
-            code = code.format(path)
-        else:
-            raise Exception()
-        context[name] = f"{name} = {code}\n"
-        yield f"def {name}():\n    return {code}"
-
-
-def validate_factories(factories):
-    pass
 
 
 def process_usage_block(blocks, use):
