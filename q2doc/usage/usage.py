@@ -50,22 +50,10 @@ def validate_factories(factories):
     pass
 
 
-def parse_content(block):
-    node = block["nodes"][0]
-    factory = getattr(node, "factory", "")
-    if factory:
-        block["setup"] = ""
-        code = factory_factory(block)
-        return "\n".join(code)
-    return block["code"]
-
-
 def process_usage_block(blocks, use):
     # Use a list to preserve the order
     processed_records = []
     for block in blocks:
-        # Grab code in the current block and execute it.
-        code = parse_content(block)
         tree = ast.parse(code)
         block["tree"] = tree
         source = compile(tree, filename="<ast>", mode="exec")
