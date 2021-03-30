@@ -7,6 +7,7 @@ from q2doc.usage.nodes import UsageNode
 class UsageDirective(SphinxDirective):
     has_content = True
     option_spec = {'factory': docutils.parsers.rst.directives.flag}
+        'name': str
 
     def run(self):
         code = "\n".join(self.content)
@@ -16,6 +17,7 @@ class UsageDirective(SphinxDirective):
         env.usage_blocks.append({"code": code})
         factory = "factory" in self.options
         return [UsageNode(factory=factory)]
+        name = self.options.get('name')
         nodes = [UsageNode(factory=factory, name=name)]
         env.usage_blocks.append(
             {"code": code,
