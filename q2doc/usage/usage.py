@@ -2,6 +2,7 @@ import ast
 import functools
 import operator
 import os
+from pathlib import Path
 from typing import Tuple, Union
 
 import docutils
@@ -70,13 +71,13 @@ def update_processed_records(new_records, processed_records):
 
 
 def factories_to_nodes(block):
-    nodes = []
-    # TODO Call factories and save results
-    # TODO Get tutorial name for URL
-    base = "https://library.qiime2.org"
     usage_node = block["nodes"].pop()
+    root, docname = [Path(p) for p in Path(usage_node.source).parts[-2:]]
+    docname = docname.stem
+    base = 'https://library.qiime2.org'
     name = f'{usage_node.name}.qza'
-    dl_node = download_node(id_=name, url=f"{base}/{name}", saveas=name)
+    url = f'{base}/{root}/{docname}/{name}'
+    dl_node = download_node(id_=name, url=url, saveas=name)
     block["nodes"].append(dl_node)
 
 
