@@ -97,19 +97,14 @@ def records_to_nodes(use, records, block) -> None:
 
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block):
-    nodes = []
     if block["nodes"][0].factory:
         factories_to_nodes(block)
-    # for record in records:
-        # nodes.append(docutils.nodes.title(text=record.ref))
-        # if record.source == "init_metadata":
-        #     metadata_node = metadata_preview(record)
-        #     nodes.append(metadata_node)
-        # elif record.source not in ["action", "get_metadata_column"]:
-        #     return []
-        # else:
-        #     return []
-    block["nodes"].extend(nodes)
+    for record in records:
+        artifact, ref = record.result, record.ref
+        if record.source == "init_metadata":
+            artifact.save(ref)
+        elif record.source == "init_data":
+            artifact.save(ref)
 
 
 @records_to_nodes.register(CLIUsage)
