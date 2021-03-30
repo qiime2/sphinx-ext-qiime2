@@ -9,7 +9,6 @@ def setup(app):
     app.add_node(UsageExampleNode, html=(_, UsageExampleNode.depart))
     app.add_node(UsageDataNode, html=(_, UsageDataNode.depart))
     app.add_node(UsageMetadataNode, html=(_, UsageMetadataNode.depart))
-    app.add_config_value('factory', False, 'html')
     app.connect("doctree-resolved", process_usage_blocks)
 
 
