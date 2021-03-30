@@ -6,9 +6,10 @@ jinja_env = jinja2.Environment(loader=loader)
 
 
 class UsageNode(docutils.nodes.General, docutils.nodes.Element):
-    def __init__(self, factory=False, *args, **kwargs):
+    def __init__(self, factory=False, name=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.factory = factory
+        self.name = name
 
 
 class UsageExampleNode(UsageNode):
