@@ -67,7 +67,7 @@ def cutadapt_example(use, data, metadata):
 
 def test_records_to_nodes_no_records(usage_drivers):
     use = usage_drivers
-    result = records_to_nodes(use, {}, [])
+    result = records_to_nodes(use, {}, )
     assert not result
 
 
@@ -75,7 +75,7 @@ def test_records_to_nodes_execution_usage():
     use = usage.ExecutionUsage()
     use, data, metadata = init_data(use)
     records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [])
+    result = records_to_nodes(use, records, )
 
     exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
     assert all(itertools.starmap(isinstance, exp_nodes))
@@ -83,14 +83,14 @@ def test_records_to_nodes_execution_usage():
 
     cutadapt_example(use, data, metadata)
     records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [Mock()])
+    result = records_to_nodes(use, records, )
 
 
 def test_records_to_nodes_cli_usage():
     use = CLIUsage()
     use, data, metadata = init_data(use)
     records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [])
+    result = records_to_nodes(use, records, )
 
     exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
     assert all(itertools.starmap(isinstance, exp_nodes))
@@ -98,7 +98,7 @@ def test_records_to_nodes_cli_usage():
 
     cutadapt_example(use, data, metadata)
     records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [Mock()])
+    result = records_to_nodes(use, records, )
 
 
 def test_records_to_nodes_artifact_api_usage():
@@ -106,7 +106,7 @@ def test_records_to_nodes_artifact_api_usage():
     use, data, metadata = init_data(use)
 
     records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [])
+    result = records_to_nodes(use, records, )
 
     exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
     assert all(itertools.starmap(isinstance, exp_nodes))
@@ -114,7 +114,7 @@ def test_records_to_nodes_artifact_api_usage():
     cutadapt_example(use, data, metadata)
 
     records = get_new_records(use, [])
-    result = records_to_nodes(use, records, [Mock()])
+    result = records_to_nodes(use, records, )
 
 
 def test_get_new_records(drivers_with_initialized_data):
