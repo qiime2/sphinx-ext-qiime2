@@ -91,7 +91,7 @@ class FuncVisitor(ast.NodeVisitor):
 
 
 @functools.singledispatch
-def records_to_nodes(use, records, prev_nodes) -> None:
+def records_to_nodes(use, records, block) -> None:
     """Transform ScopeRecords into docutils Nodes."""
 
 
