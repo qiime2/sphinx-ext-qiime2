@@ -1,4 +1,4 @@
-import docutils
+from docutils.parsers.rst import directives
 from sphinx.util.docutils import SphinxDirective
 
 from q2doc.usage.nodes import UsageNode
