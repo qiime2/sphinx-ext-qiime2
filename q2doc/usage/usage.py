@@ -25,14 +25,6 @@ from qiime2.sdk.usage import ScopeRecord
 context = {}
 
 
-def extract_blocks(doctree, env):
-    blocks = []
-    tree = doctree.traverse(UsageNode)
-    for node, code in zip(tree, env.usage_blocks):
-        blocks.append({"code": code["code"], "nodes": [node]})
-    return blocks
-
-
 def factory_factory(block):
     content = block["code"]
     factories = yaml.load(content, Loader=yaml.SafeLoader)
@@ -87,7 +79,6 @@ def process_usage_block(blocks, use):
 def process_usage_blocks(app, doctree, _):
     env = app.builder.env
     os.chdir(env.srcdir)
-    blocks = extract_blocks(doctree, env)
     for use in MetaUsage:
         use = use.value
         process_usage_block(blocks, use)
