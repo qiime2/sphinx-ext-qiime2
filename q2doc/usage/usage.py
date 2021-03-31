@@ -149,7 +149,7 @@ def init_data_node(record):
     name = record.ref
     artifact = MetaUsage.execution.value._get_record(name).result
     stype = f"{artifact.type}"
-    setup = f"{name} = qiime2.Artifact.load('{stype}', '{name}.qza')"
+    setup = f"{name} = qiime2.Artifact.load('{name}.qza')"
     node = UsageDataNode(stype, setup)
     node.name = name
     return node
