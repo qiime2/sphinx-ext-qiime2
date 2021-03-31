@@ -22,7 +22,7 @@ class UsageDirective(SphinxDirective):
         env = self.state.document.settings.env
         if not hasattr(env, "usage_blocks"):
             env.usage_blocks = []
-        factory = self.options.get('factory')
+        factory = True if self.options.get('factory') else False
         name = self.options.get('name')
         node = UsageNode(factory=factory, name=name)
         env.usage_blocks.append({"code": code, "nodes": [node]})
