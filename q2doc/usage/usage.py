@@ -147,10 +147,11 @@ def artifact_api(use, records, block, env):
 
 def init_data_node(record):
     name = record.ref
-    stype = f"'{artifact.type}'"
-    setup = f"{name} = qiime2.Artifact.import_data({stype}, '{name}.qza')"
     artifact = MetaUsage.execution.value._get_record(name).result
+    stype = f"{artifact.type}"
+    setup = f"{name} = qiime2.Artifact.import_data('{stype}', '{name}.qza')"
     node = UsageDataNode(stype, setup)
+    node.name = name
     return node
 
 
@@ -165,4 +166,5 @@ def init_metadata_node(record):
     setup = f"{name} = qiime2.Metadata.load('{name}.qza)'"
     preview = str(metadata.to_dataframe().head())
     node = UsageMetadataNode(setup, preview)
+    node.name = name
     return node
