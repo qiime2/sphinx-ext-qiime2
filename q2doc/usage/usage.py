@@ -22,29 +22,21 @@ from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
 
 
-context = {}
-
-
-def process_usage_block(use, env):
-    # Use a list to preserve the order
-    processed_records = []
-    for block in env.usage_blocks:
-        tree = ast.parse(block['code'])
-        block["tree"] = tree
-        source = compile(tree, filename="<ast>", mode="exec")
-        # TODO: validate the ast
-        exec(source)
-        new_records = get_new_records(use, processed_records)
-        records_to_nodes(use, new_records, block, env)
-        update_processed_records(new_records, processed_records)
-
-
 def process_usage_blocks(app, doctree, _):
     env = app.builder.env
     os.chdir(env.srcdir)
     for use in MetaUsage:
         use = use.value
-        process_usage_block(use, env)
+        processed_records = []
+        for block in env.usage_blocks:
+            tree = ast.parse(block['code'])
+            block["tree"] = tree
+            source = compile(tree, filename="<ast>", mode="exec")
+            # TODO: validate the AST
+            exec(source)
+            new_records = get_new_records(use, processed_records)
+            records_to_nodes(use, new_records, block, env)
+            update_processed_records(new_records, processed_records)
     update_nodes(doctree, env)
 
 
