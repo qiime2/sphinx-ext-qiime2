@@ -97,7 +97,7 @@ def records_to_nodes(use, records, block, env) -> None:
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block, env):
     if block["nodes"][0].factory:
-        factories_to_nodes(block)
+        factories_to_nodes(block, env)
     for record in records:
         artifact = record.result
         path = os.path.join(env.srcdir, f'{record.ref}.qza')
