@@ -24,8 +24,6 @@ class UsageDirective(SphinxDirective):
             env.usage_blocks = []
         factory = self.options.get('factory')
         name = self.options.get('name')
-        nodes = [UsageNode(factory=factory, name=name)]
-        env.usage_blocks.append(
-            {"code": code,
-             "nodes": nodes})
-        return nodes
+        node = UsageNode(factory=factory, name=name)
+        env.usage_blocks.append({"code": code, "nodes": [node]})
+        return [node]
