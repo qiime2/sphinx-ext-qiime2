@@ -96,12 +96,16 @@ def records_to_nodes(use, records, block, env) -> None:
 
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block, env):
+    out_dir = Path(env.srcdir) / Path(env.config.values.get('output-dir')[0])
+    if not out_dir.exists():
+        out_dir.mkdir()
     if block["nodes"][0].factory:
         factories_to_nodes(block, env)
     for record in records:
         artifact = record.result
-        path = os.path.join(env.srcdir, f'{record.ref}.qza')
-        # TODO .save doesn't save where I expected it to...
+        path = os.path.join(out_dir, f'{record.ref}.qza')
+        # TODO When running tests, artifacts are saved in the tmp testing dir
+        #  *as well as* in this repo.  Prevent saving in the repo.
         if record.source == "init_metadata":
             artifact.save(path)
         elif record.source == "init_data":
