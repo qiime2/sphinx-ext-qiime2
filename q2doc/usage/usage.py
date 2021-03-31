@@ -70,14 +70,15 @@ def update_processed_records(new_records, processed_records):
     processed_records.extend(refs)
 
 
-def factories_to_nodes(block):
+def factories_to_nodes(block, env):
     usage_node = block["nodes"].pop()
     root, docname = [Path(p) for p in Path(usage_node.source).parts[-2:]]
     docname = docname.stem
     base = 'https://library.qiime2.org'
     name = f'{usage_node.name}.qza'
     url = f'{base}/{root}/{docname}/{name}'
-    dl_node = download_node(id_=name, url=url, saveas=name)
+    id_ = env.new_serialno()
+    dl_node = download_node(id_=id_, url=url, saveas=name)
     block["nodes"].append(dl_node)
 
 
