@@ -10,12 +10,7 @@ def factory_spec(name):
 
 class UsageDirective(SphinxDirective):
     has_content = True
-    option_spec = {
-        'factory': factory_spec,
-        'name': str
-    }
-    # TODO Validate the spec
-    #  assert v in factory.values()
+    option_spec = {'factory': factory_spec, 'name': str}
 
     def run(self):
         code = "\n".join(self.content)

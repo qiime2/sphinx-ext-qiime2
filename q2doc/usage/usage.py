@@ -7,7 +7,7 @@ from typing import Tuple, Union
 
 import docutils
 
-import qiime2
+import qiime2  # noqa: F401
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
 from q2doc.command_block.extension import download_node
@@ -48,13 +48,12 @@ def update_nodes(doctree, env):
 
 
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
-    """Select records from the Usage driver's Scope that we haven't seen yet."""
+    new_records = tuple()
     records = use._get_records()
-    new_records = [k for k in records.keys() if k not in processed_records]
-    records = (
-        operator.itemgetter(*new_records)(records) if new_records else tuple()
-    )
-    return records
+    new_record_keys = [k for k in records.keys() if k not in processed_records]
+    if new_record_keys:
+        new_records = operator.itemgetter(*new_record_keys)(records)
+    return new_records
 
 
 def update_processed_records(new_records, processed_records):
@@ -63,22 +62,17 @@ def update_processed_records(new_records, processed_records):
 
 
 def factories_to_nodes(block, env):
-    usage_node = block["nodes"].pop()
-    root, docname = [Path(p) for p in Path(usage_node.source).parts[-2:]]
+    node = block["nodes"].pop()
+    root, docname = [Path(p) for p in Path(node.source).parts[-2:]]
     docname = docname.stem
     base = 'https://library.qiime2.org'
-    name = f'{usage_node.name}.qza'
+    name = f'{node.name}.qza'
+    # These files won't actually exist until their respective init data blocks
+    # are evaluated by ExecutionUsage.
     url = f'{base}/{root}/{docname}/{name}'
     id_ = env.new_serialno()
     dl_node = download_node(id_=id_, url=url, saveas=name)
     block["nodes"].append(dl_node)
-
-
-class FuncVisitor(ast.NodeVisitor):
-    names = []
-
-    def visit_FunctionDef(self, node: ast.FunctionDef):
-        self.names.append(node.name)
 
 
 @functools.singledispatch
@@ -88,6 +82,7 @@ def records_to_nodes(use, records, block, env) -> None:
 
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block, env):
+    """Creates download nodes and saves factory results."""
     out_dir = Path(env.srcdir) / Path(env.config.values.get('output-dir')[0])
     if not out_dir.exists():
         out_dir.mkdir()
@@ -98,56 +93,53 @@ def execution(use, records, block, env):
         path = os.path.join(out_dir, f'{record.ref}.qza')
         # TODO When running tests, artifacts are saved in the tmp testing dir
         #  *as well as* in this repo.  Prevent saving in the repo.
-        if record.source == "init_metadata":
-            artifact.save(path)
-        elif record.source == "init_data":
+        if record.source == "init_metadata" or "init_data":
             artifact.save(path)
 
 
 @records_to_nodes.register(CLIUsage)
 def cli(use, records, block, env):
-    nodes = []
     for record in records:
-        source = record.source
-        if source == "action":
+        if record.source == "action":
             example = "".join(use.render())
-            nodes.append(
-                UsageExampleNode(titles=["Command Line"], examples=[example])
+            node = UsageExampleNode(
+                titles=["Command Line"], examples=[example]
             )
+            # Break after seeing the first record created by use.action() since
+            # we only need to call use.render() once.
+            block["nodes"] = [node]
             break
-    block["nodes"].extend(nodes)
 
 
 @records_to_nodes.register(ArtifactAPIUsage)
 def artifact_api(use, records, block, env):
-    nodes = []
     for record in records:
         source = record.source
         if source == "init_data":
-            # TODO Keep track of which example data we've seen?
-            nodes.append(docutils.nodes.title(text=record.ref))
+            block['nodes'].append(docutils.nodes.title(text=record.ref))
             data_node = init_data_node(record)
-            nodes.append(data_node)
+            block['nodes'].append(data_node)
         elif source == "init_metadata":
-            nodes.append(docutils.nodes.title(text=record.ref))
+            block['nodes'].append(docutils.nodes.title(text=record.ref))
             metadata_node = init_metadata_node(record)
-            nodes.append(metadata_node)
+            block['nodes'].append(metadata_node)
         elif source == "action":
-            node = block["nodes"][1]
+            node = block["nodes"][0]
             example = use.render()
             node.titles.append("Artifact API")
             node.examples.append(example)
+            # Break after seeing the first record created by use.action() since
+            # we only need to call use.render() once.
             break
-    block["nodes"].extend(nodes)
 
 
 def init_data_node(record):
     name = record.ref
+    fname = f"{name}.qza"
     artifact = MetaUsage.execution.value._get_record(name).result
     stype = f"{artifact.type}"
-    setup = f"{name} = qiime2.Artifact.load('{name}.qza')"
-    node = UsageDataNode(stype, setup)
-    node.name = name
+    load_statement = f"{name} = qiime2.Artifact.load('{fname}')"
+    node = UsageDataNode(stype, load_statement, name=name)
     return node
 
 
@@ -155,8 +147,7 @@ def init_metadata_node(record):
     name = record.ref
     fname = f"{name}.qza"
     metadata = MetaUsage.execution.value._get_record(name).result
-    setup = f"{name} = qiime2.Metadata.load('{fname}')"
-    preview = str(metadata.to_dataframe())
-    node = UsageMetadataNode(setup, preview)
-    node.name = name
+    load_statement = f"{name} = qiime2.Metadata.load('{fname}')"
+    metadata_preview = str(metadata.to_dataframe())
+    node = UsageMetadataNode(load_statement, metadata_preview, name=name)
     return node

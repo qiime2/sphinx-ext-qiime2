@@ -1,6 +1,11 @@
 from q2doc.usage.usage import process_usage_blocks
 from q2doc.usage.directive import UsageDirective
-from q2doc.usage.nodes import UsageNode, UsageExampleNode, UsageDataNode, UsageMetadataNode
+from q2doc.usage.nodes import (
+    UsageNode,
+    UsageExampleNode,
+    UsageDataNode,
+    UsageMetadataNode,
+)
 
 
 def setup(app):
