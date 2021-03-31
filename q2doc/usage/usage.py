@@ -155,11 +155,6 @@ def init_data_node(record):
     return node
 
 
-def artifact_api_setup(data):
-    setup = "Artifact API setup"
-    return setup
-
-
 def init_metadata_node(record):
     name = record.ref
     metadata = MetaUsage.execution.value._get_record(name).result
