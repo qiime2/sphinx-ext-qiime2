@@ -134,7 +134,7 @@ def test_usage_html(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
-    build_result = app.outdir / 'tutorials' / 'cutadapt' / 'index.html'
+    build_result = app.outdir / 'cutadapt' / 'index.html'
     file_regression.check(build_result.read_text(), extension=".html")
 
 

@@ -5,22 +5,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cutadapt Tutorial &#8212; QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/external-links.js"></script>
-    <link rel="index" title="Index" href="../../genindex/" />
-    <link rel="search" title="Search" href="../../search/" />
-    <link rel="next" title="“Moving Pictures” tutorial" href="../moving-pictures/" />
-    <link rel="prev" title="Tutorials" href="../" />
-  <script src="../../_static/bootstrap.min.js"></script>
-  <script src="../../_static/clipboard.min.js"></script>
-  <link rel="icon" href="../../_static/favicon.ico" type="image/png" />
-  <link rel="stylesheet" href="../../_static/css/bootstrap.min.css" media="screen" />
-  <link rel="stylesheet" href="../../_static/css/normalize.css" media="screen">
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/external-links.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+  <script src="../_static/bootstrap.min.js"></script>
+  <script src="../_static/clipboard.min.js"></script>
+  <link rel="icon" href="../_static/favicon.ico" type="image/png" />
+  <link rel="stylesheet" href="../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../_static/css/normalize.css" media="screen">
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -35,7 +33,7 @@
   </head><body>
 <a href="https://github.com/qiime2/qiime2" id="github-banner">
   <img
-    src="../../_static/github_banner.png"
+    src="../_static/github_banner.png"
     alt="Fork me on GitHub"
   />
 </a>
@@ -45,7 +43,7 @@
       <a href="/">
         <img
           class="img-responsive"
-          src="../../_static/q2docs.png" alt="QIIME 2 Docs"
+          src="../_static/q2docs.png" alt="QIIME 2 Docs"
         />
       </a>
     </div>
@@ -63,50 +61,64 @@
 the <cite>data/</cite> dir, which will be the extent of the data scope. Everything
 stored in <cite>data/</cite> will get download blocks generated automatically.</p>
 </div>
-<h2>data<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
+<p>First, we declare data needed by the usage example that follows. This will render download elements.  At this point,
+we don’t mention anything driver-specific - just get the data.</p>
 <div class="tabbed panel panel-default">
-    <div class="panel-heading white-bg">
-        Choose your interface:
-    </div>
+  <div class="panel-heading white-bg">
+    Please select a download option that is most appropriate for your environment:
+  </div>
 
-    <div class="panel-body">
-        <ul class="nav nav-tabs gray-bg" role="tablist">
-            <li role="presentation" class="active">
-                <a href="#preview-0" aria-controls="preview-0" role="tab" data-toggle="tab">
-                    Preview
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="#artifact-api-0" aria-controls="artifact-api-0" role="tab" data-toggle="tab">
-                    Artifact API
-                </a>
-            </li>
-        </ul>
+  <div class="panel-body">
+    <ul class="nav nav-tabs gray-bg" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#browser-0" aria-controls="browser-0" role="tab" data-toggle="tab">
+          Browser
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#wget-0" aria-controls="wget-0" role="tab" data-toggle="tab">
+          wget
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#curl-0" aria-controls="messages-0" role="tab" data-toggle="tab">
+          curl
+        </a>
+      </li>
+    </ul>
 
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane fade in active" id="preview-0">
-                <p>
-                    <strong>Preview</strong>
-
-                <div class="highlight">
-                    <pre>MultiplexedSingleEndBarcodeInSequence</pre>
-                </div>
-                </p>
-            </div>
-            <div role="tabpanel" class="tab-pane fade" id="artifact-api-0">
-                <p>
-                    <strong>Artifact API</strong>
-
-                <div class="highlight">
-                    <pre>setup</pre>
-                </div>
-                </p>
-                <div class="clearfix"></div>
-                <div class="highlight-shell">
-                </div>
-            </div>
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade in active" id="browser-0">
+        <p>
+          <strong>Download URL:</strong> <a href="https://library.qiime2.org/q2doc/cutadapt/multiplexed_sequences.qza">
+            https://library.qiime2.org/q2doc/cutadapt/multiplexed_sequences.qza
+          </a>
+        </p>
+        <p>
+          <strong>Save as:</strong> multiplexed_sequences.qza
+        </p>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="wget-0">
+        <div class="clearfix"></div>
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>wget \
+  -O "multiplexed_sequences.qza" \
+  "https://library.qiime2.org/q2doc/cutadapt/multiplexed_sequences.qza"</pre>
+          </div>
         </div>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="curl-0">
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>curl -sL \
+  "https://library.qiime2.org/q2doc/cutadapt/multiplexed_sequences.qza" > \
+  "multiplexed_sequences.qza"</pre>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div><div class="tabbed panel panel-default">
   <div class="panel-heading white-bg">
     Please select a download option that is most appropriate for your environment:
@@ -115,155 +127,49 @@ stored in <cite>data/</cite> will get download blocks generated automatically.</
   <div class="panel-body">
     <ul class="nav nav-tabs gray-bg" role="tablist">
       <li role="presentation" class="active">
-        <a href="#browser-data" aria-controls="browser-data" role="tab" data-toggle="tab">
+        <a href="#browser-1" aria-controls="browser-1" role="tab" data-toggle="tab">
           Browser
         </a>
       </li>
       <li role="presentation">
-        <a href="#wget-data" aria-controls="wget-data" role="tab" data-toggle="tab">
+        <a href="#wget-1" aria-controls="wget-1" role="tab" data-toggle="tab">
           wget
         </a>
       </li>
       <li role="presentation">
-        <a href="#curl-data" aria-controls="messages-data" role="tab" data-toggle="tab">
+        <a href="#curl-1" aria-controls="messages-1" role="tab" data-toggle="tab">
           curl
         </a>
       </li>
     </ul>
 
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane fade in active" id="browser-data">
+      <div role="tabpanel" class="tab-pane fade in active" id="browser-1">
         <p>
-          <strong>Download URL:</strong> <a href="data">
-            data
+          <strong>Download URL:</strong> <a href="https://library.qiime2.org/q2doc/cutadapt/metadata.qza">
+            https://library.qiime2.org/q2doc/cutadapt/metadata.qza
           </a>
         </p>
         <p>
-          <strong>Save as:</strong> data
+          <strong>Save as:</strong> metadata.qza
         </p>
       </div>
-      <div role="tabpanel" class="tab-pane fade" id="wget-data">
+      <div role="tabpanel" class="tab-pane fade" id="wget-1">
         <div class="clearfix"></div>
         <div class="highlight-shell">
           <div class="highlight">
             <pre>wget \
-  -O "data" \
-  "data"</pre>
+  -O "metadata.qza" \
+  "https://library.qiime2.org/q2doc/cutadapt/metadata.qza"</pre>
           </div>
         </div>
       </div>
-      <div role="tabpanel" class="tab-pane fade" id="curl-data">
+      <div role="tabpanel" class="tab-pane fade" id="curl-1">
         <div class="highlight-shell">
           <div class="highlight">
             <pre>curl -sL \
-  "data" > \
-  "data"</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><h2>metadata<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
-<div class="tabbed panel panel-default">
-    <div class="panel-heading white-bg">
-        Choose your interface:
-    </div>
-
-    <div class="panel-body">
-        <ul class="nav nav-tabs gray-bg" role="tablist">
-            <li role="presentation" class="active">
-                <a href="#preview-1" aria-controls="preview-1" role="tab" data-toggle="tab">
-                    Preview
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="#artifact-api-1" aria-controls="artifact-api-1" role="tab" data-toggle="tab">
-                    Artifact API
-                </a>
-            </li>
-        </ul>
-
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane fade in active" id="preview-1">
-                <p>
-                    <strong>Preview</strong>
-
-                <div class="highlight">
-                    <pre>               barcodes
-sample-id              
-L1S8       AGCTGACTAGTC
-L1S57      ACACACTATGGC
-L1S76      ACTACGTGTGGT
-L1S105     AGTGCGATGCGT
-L2S155     ACGATGCGACCA</pre>
-                </div>
-                </p>
-            </div>
-            <div role="tabpanel" class="tab-pane fade" id="artifact-api-1">
-                <p>
-                    <strong>Artifact API</strong>
-
-                <div class="highlight">
-                    <pre>setup</pre>
-                </div>
-                </p>
-                <div class="clearfix"></div>
-                <div class="highlight-shell">
-                </div>
-            </div>
-        </div>
-    </div>
-</div><div class="tabbed panel panel-default">
-  <div class="panel-heading white-bg">
-    Please select a download option that is most appropriate for your environment:
-  </div>
-
-  <div class="panel-body">
-    <ul class="nav nav-tabs gray-bg" role="tablist">
-      <li role="presentation" class="active">
-        <a href="#browser-metadata" aria-controls="browser-metadata" role="tab" data-toggle="tab">
-          Browser
-        </a>
-      </li>
-      <li role="presentation">
-        <a href="#wget-metadata" aria-controls="wget-metadata" role="tab" data-toggle="tab">
-          wget
-        </a>
-      </li>
-      <li role="presentation">
-        <a href="#curl-metadata" aria-controls="messages-metadata" role="tab" data-toggle="tab">
-          curl
-        </a>
-      </li>
-    </ul>
-
-    <div class="tab-content">
-      <div role="tabpanel" class="tab-pane fade in active" id="browser-metadata">
-        <p>
-          <strong>Download URL:</strong> <a href="metadata">
-            metadata
-          </a>
-        </p>
-        <p>
-          <strong>Save as:</strong> metadata
-        </p>
-      </div>
-      <div role="tabpanel" class="tab-pane fade" id="wget-metadata">
-        <div class="clearfix"></div>
-        <div class="highlight-shell">
-          <div class="highlight">
-            <pre>wget \
-  -O "metadata" \
-  "metadata"</pre>
-          </div>
-        </div>
-      </div>
-      <div role="tabpanel" class="tab-pane fade" id="curl-metadata">
-        <div class="highlight-shell">
-          <div class="highlight">
-            <pre>curl -sL \
-  "metadata" > \
-  "metadata"</pre>
+  "https://library.qiime2.org/q2doc/cutadapt/metadata.qza" > \
+  "metadata.qza"</pre>
           </div>
         </div>
       </div>
@@ -271,7 +177,84 @@ L2S155     ACGATGCGACCA</pre>
   </div>
 </div><p>The data here consists of single-end reads (6 reads total). There are two
 samples present in the data, with the following barcodes on the 5’ end:</p>
-</div>
+<h2>multiplexed_sequences<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
+<div class="tabbed panel panel-default">
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#artifact-api-0" aria-controls="artifact-api-0" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="artifact-api-0">
+                <p>
+                    <strong>Load <code>MultiplexedSingleEndBarcodeInSequence</code></strong>
+
+                <div class="highlight">
+                    <pre>multiplexed_sequences = qiime2.Artifact.load('multiplexed_sequences.qza')</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div><h2>metadata<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
+<div class="tabbed panel panel-default">
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation">
+                <a href="#artifact-api-1" aria-controls="artifact-api-1" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+            <li role="presentation" class="active">
+                <a href="#preview-1" aria-controls="preview-1" role="tab" data-toggle="tab">
+                    Preview Metadata
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade" id="artifact-api-1">
+                <p>
+                    <strong>Load Metadata</strong>
+
+                <div class="highlight">
+                    <pre>metadata = qiime2.Metadata.load('metadata.qza')</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade in active" id="preview-1">
+                <p>
+                <div class="highlight">
+                    <pre>               barcodes
+sample-id              
+L1S8       AGCTGACTAGTC
+L1S57      ACACACTATGGC
+L1S76      ACTACGTGTGGT
+L1S105     AGTGCGATGCGT
+L2S155     ACGATGCGACCA
+L2S175     AGCTATCCACGA
+L2S204     ATGCAGCTCAGT
+L2S222     CACGTGACATGT
+L3S242     ACAGTTGCGCGA
+L3S294     CACGACAGGCTA
+L3S313     AGTGTCACGGTG
+L3S341     CAAGTGAGAGAG</pre>
+                </div>
+                </p>
+            </div>
+        </div>
+    </div>
+</div></div>
 <div class="section" id="demultiplex-the-reads">
 <h2>Demultiplex the reads<a class="headerlink" href="#demultiplex-the-reads" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have everything imported, let’s do the thing:</p>
@@ -301,7 +284,7 @@ samples present in the data, with the following barcodes on the 5’ end:</p>
 
                 <div class="highlight">
                     <pre>qiime cutadapt demux-single \
-    --i-seqs data.qza \
+    --i-seqs multiplexed_sequences.qza \
     --p-error-rate 0 \
     --m-barcodes-file metadata.tsv \
     --m-barcodes-column 'barcodes' \
@@ -320,7 +303,7 @@ samples present in the data, with the following barcodes on the 5’ end:</p>
 barcodes = metadata.get_column('barcodes')
 
 demultiplexed_seqs, untrimmed = demux_single(
-    seqs=data,
+    seqs=multiplexed_sequences,
     barcodes=barcodes,
     error_rate=0,
 )
@@ -348,19 +331,12 @@ demultiplexed_seqs, untrimmed = demux_single(
           <ul id="version-list" class="dropdown-menu"></ul>
         </div>
         
-<h3><a href="../../">Table of Contents</a></h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Cutadapt Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../moving-pictures/">“Moving Pictures” tutorial</a></li>
-</ul>
-</li>
-</ul>
+<h3><a href="#">Table of Contents</a></h3>
 
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
-    <form class="search" action="../../search/" method="get">
+    <form class="search" action="../search/" method="get">
       <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
@@ -376,8 +352,8 @@ demultiplexed_seqs, untrimmed = demux_single(
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.2.
     </div>
   </div>
-  <script src="../../_static/bootstrap-dropdown.js" charset="utf-8"></script>
-  <script src="../../_static/clipboard-driver.js"></script>
+  <script src="../_static/bootstrap-dropdown.js" charset="utf-8"></script>
+  <script src="../_static/clipboard-driver.js"></script>
   <script src="/versions.js" charset="utf-8"></script>
   </body>
 </html>
