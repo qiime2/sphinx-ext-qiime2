@@ -157,9 +157,10 @@ def init_data_node(record):
 
 def init_metadata_node(record):
     name = record.ref
+    fname = f"{name}.qza"
     metadata = MetaUsage.execution.value._get_record(name).result
-    setup = f"{name} = qiime2.Metadata.load('{name}.qza)'"
-    preview = str(metadata.to_dataframe().head())
+    setup = f"{name} = qiime2.Metadata.load('{fname}')"
+    preview = str(metadata.to_dataframe())
     node = UsageMetadataNode(setup, preview)
     node.name = name
     return node
