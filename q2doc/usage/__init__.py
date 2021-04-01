@@ -14,7 +14,7 @@ def setup(app):
     app.add_node(UsageExampleNode, html=(_, UsageExampleNode.depart))
     app.add_node(UsageDataNode, html=(_, UsageDataNode.depart))
     app.add_node(UsageMetadataNode, html=(_, UsageMetadataNode.depart))
-    app.add_config_value('output-dir', 'results', 'html')
+    app.add_config_value('output-dir', 'results', 'html', str)
     app.connect("doctree-resolved", process_usage_blocks)
 
 

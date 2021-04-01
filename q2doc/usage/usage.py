@@ -83,7 +83,8 @@ def records_to_nodes(use, records, block, env) -> None:
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block, env):
     """Creates download nodes and saves factory results."""
-    out_dir = Path(env.srcdir) / Path(env.config.values.get('output-dir')[0])
+    out_dir = Path(env.app.builder.outdir)
+    out_dir = out_dir / Path(env.config.values.get('output-dir')[0])
     if not out_dir.exists():
         out_dir.mkdir()
     if block["nodes"][0].factory:
