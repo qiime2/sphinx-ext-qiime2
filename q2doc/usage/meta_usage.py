@@ -6,6 +6,7 @@ from qiime2.sdk import usage as usage
 
 
 class MetaUsage(Enum):
+    diagnostic = usage.DiagnosticUsage()
     execution = usage.ExecutionUsage()
     cli = CLIUsage()
     artifact_api = ArtifactAPIUsage()

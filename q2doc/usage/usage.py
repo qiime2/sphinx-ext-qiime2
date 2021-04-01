@@ -17,9 +17,11 @@ from q2doc.usage.nodes import (
     UsageDataNode,
     UsageMetadataNode,
 )
-from q2doc.usage.meta_usage import MetaUsage
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
+
+from .meta_usage import MetaUsage
+from .validation import BlockValidator
 
 
 def process_usage_blocks(app, doctree, _):
@@ -32,7 +34,6 @@ def process_usage_blocks(app, doctree, _):
             tree = ast.parse(block['code'])
             block["tree"] = tree
             source = compile(tree, filename="<ast>", mode="exec")
-            # TODO: validate the AST
             exec(source)
             new_records = get_new_records(use, processed_records)
             records_to_nodes(use, new_records, block, env)
@@ -78,6 +79,12 @@ def factories_to_nodes(block, env):
 @functools.singledispatch
 def records_to_nodes(use, records, block, env) -> None:
     """Transform ScopeRecords into docutils Nodes."""
+
+
+@records_to_nodes.register(usage.DiagnosticUsage)
+def diagnostic(use, records, block, env):
+    validator = BlockValidator()
+    validator.visit(block['tree'])
 
 
 @records_to_nodes.register(usage.ExecutionUsage)
