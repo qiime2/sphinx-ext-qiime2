@@ -30,7 +30,6 @@ root = pathlib.Path(__file__).parent.absolute()
 sys.path.insert(0, str(root))
 
 master_doc = "cutadapt"
-templates_path = ['_templates']
 extensions = [
     'q2doc.question',
     'q2doc.qiime1',
@@ -52,9 +51,6 @@ exclude_patterns = [
     'sphinx_extensions/command_block/templates',
 ]
 pygments_style = 'sphinx'
-html_theme = 'theme'  # use the theme in subdir 'theme'
-html_theme_path = ['.']  # make sphinx search for themes in current dir
-html_static_path = ['_static']
 html_sidebars = {
     "**": ['globaltoc.html', 'searchbox.html']
 }
