@@ -64,13 +64,12 @@ def update_processed_records(new_records, processed_records):
 
 def factories_to_nodes(block, env):
     node = block["nodes"].pop()
-    root, docname = [Path(p) for p in Path(node.source).parts[-2:]]
-    docname = docname.stem
-    base = 'https://library.qiime2.org'
+    root, doc_name = get_docname(node)
+    base = env.config.base_url.rstrip('/')
     name = f'{node.name}.qza'
     # These files won't actually exist until their respective init data blocks
     # are evaluated by ExecutionUsage.
-    url = f'{base}/{root}/{docname}/{name}'
+    url = f'{base}/{root}/{doc_name}/results/{name}'
     id_ = env.new_serialno()
     dl_node = FactoryNode(id_=id_, url=url, saveas=name)
     block["nodes"].append(dl_node)
@@ -90,19 +89,24 @@ def diagnostic(use, records, block, env):
 @records_to_nodes.register(usage.ExecutionUsage)
 def execution(use, records, block, env):
     """Creates download nodes and saves factory results."""
-    out_dir = Path(env.app.builder.outdir)
-    out_dir = out_dir / Path(env.config.values.get('output-dir')[0])
+    node = block["nodes"][0]
+    root, doc_name = get_docname(node)
+    out_dir = Path(env.app.outdir) / root / doc_name / 'results'
     if not out_dir.exists():
-        out_dir.mkdir()
+        out_dir.mkdir(parents=True)
     if block["nodes"][0].factory:
         factories_to_nodes(block, env)
     for record in records:
         artifact = record.result
         path = os.path.join(out_dir, f'{record.ref}.qza')
-        # TODO When running tests, artifacts are saved in the tmp testing dir
-        #  *as well as* in this repo.  Prevent saving in the repo.
         if record.source == "init_metadata" or "init_data":
             artifact.save(path)
+
+
+def get_docname(node):
+    root, doc_name = [Path(p) for p in Path(node.source).parts[-2:]]
+    doc_name = Path(doc_name.stem)
+    return root, doc_name
 
 
 @records_to_nodes.register(CLIUsage)
