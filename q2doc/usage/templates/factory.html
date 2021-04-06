@@ -1,0 +1,20 @@
+<div class="tabbed panel panel-default">
+  <div class="panel-heading white-bg">
+    Use the command below to download the data.
+  </div>
+
+  <div class="panel-body">
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade in active" id="wget-{{ node.id }}">
+        <div class="clearfix"></div>
+        <div class="highlight-shell">
+          <div class="highlight">
+            <pre>wget \
+  -O "{{ node.saveas }}" \
+  "{{ node.url }}"</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

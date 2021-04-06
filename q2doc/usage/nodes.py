@@ -53,3 +53,17 @@ class UsageMetadataNode(UsageNode):
         node.id = translator.document.settings.env.new_serialno('data_node')
         rendered = template.render(node=node)
         translator.body.append(rendered)
+
+
+class FactoryNode(docutils.nodes.Element):
+    def __init__(self, id_, url, saveas, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.id = id_
+        self.url = url
+        self.saveas = saveas
+
+    @staticmethod
+    def depart(translator, node):
+        template = jinja_env.get_template('factory.html')
+        rendered = template.render(node=node)
+        translator.body.append(rendered)

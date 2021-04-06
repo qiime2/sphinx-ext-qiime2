@@ -4,13 +4,14 @@ from q2doc.usage.nodes import (
     UsageNode,
     UsageExampleNode,
     UsageDataNode,
-    UsageMetadataNode,
+    UsageMetadataNode, FactoryNode,
 )
 
 
 def setup(app):
     app.add_directive("usage", UsageDirective)
     app.add_node(UsageNode, html=(_, _))
+    app.add_node(FactoryNode, html=(_, FactoryNode.depart))
     app.add_node(UsageExampleNode, html=(_, UsageExampleNode.depart))
     app.add_node(UsageDataNode, html=(_, UsageDataNode.depart))
     app.add_node(UsageMetadataNode, html=(_, UsageMetadataNode.depart))

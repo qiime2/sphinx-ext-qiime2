@@ -10,12 +10,12 @@ import docutils
 import qiime2  # noqa: F401
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
-from q2doc.command_block.extension import download_node
 from q2doc.usage.nodes import (
     UsageNode,
     UsageExampleNode,
     UsageDataNode,
     UsageMetadataNode,
+    FactoryNode,
 )
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
@@ -72,7 +72,7 @@ def factories_to_nodes(block, env):
     # are evaluated by ExecutionUsage.
     url = f'{base}/{root}/{docname}/{name}'
     id_ = env.new_serialno()
-    dl_node = download_node(id_=id_, url=url, saveas=name)
+    dl_node = FactoryNode(id_=id_, url=url, saveas=name)
     block["nodes"].append(dl_node)
 
 
