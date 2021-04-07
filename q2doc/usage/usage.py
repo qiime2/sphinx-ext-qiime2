@@ -69,9 +69,10 @@ def factories_to_nodes(block, env):
     name = f'{node.name}.qza'
     # These files won't actually exist until their respective init data blocks
     # are evaluated by ExecutionUsage.
-    url = f'{base}/{root}/{doc_name}/results/{name}'
+    relative_url = f'results/{name}'
+    absolute_url = f'{base}/{doc_name}/{relative_url}'
     id_ = env.new_serialno()
-    dl_node = FactoryNode(id_=id_, url=url, saveas=name)
+    dl_node = FactoryNode(id_=id_, relative_url=relative_url, absolute_url=absolute_url, saveas=name)
     block["nodes"].append(dl_node)
 
 
@@ -91,7 +92,7 @@ def execution(use, records, block, env):
     """Creates download nodes and saves factory results."""
     node = block["nodes"][0]
     root, doc_name = get_docname(node)
-    out_dir = Path(env.app.outdir) / root / doc_name / 'results'
+    out_dir = Path(env.app.outdir) / doc_name / 'results'
     if not out_dir.exists():
         out_dir.mkdir(parents=True)
     if block["nodes"][0].factory:

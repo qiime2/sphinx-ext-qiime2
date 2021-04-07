@@ -56,10 +56,11 @@ class UsageMetadataNode(UsageNode):
 
 
 class FactoryNode(docutils.nodes.Element):
-    def __init__(self, id_, url, saveas, *args, **kwargs):
+    def __init__(self, id_, relative_url, absolute_url, saveas, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = id_
-        self.url = url
+        self.relative_url = relative_url
+        self.absolute_url = absolute_url
         self.saveas = saveas
 
     @staticmethod

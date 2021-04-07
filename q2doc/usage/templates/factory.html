@@ -1,6 +1,6 @@
 <div class="tabbed panel panel-default">
   <div class="panel-heading white-bg">
-    Use the command below to download tutorial data.
+    Use the command below to download <a href="{{ node.relative_url }}">{{node.saveas }}</a>
   </div>
 
   <div class="panel-body">
@@ -11,7 +11,8 @@
           <div class="highlight">
             <pre>wget \
   -O "{{ node.saveas }}" \
-  "{{ node.url }}"</pre>
+  <a href="{{ node.absolute_url }}">"{{ node.absolute_url }}"</a>
+            </pre>
           </div>
         </div>
       </div>
