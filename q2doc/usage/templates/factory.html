@@ -1,6 +1,6 @@
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
-      Use the command below or click the link to download tutorial data.
+      Use the command below or click the link to download {{ node.saveas }}.
   </div>
 
   <div class="panel-body">
@@ -12,7 +12,7 @@ wget <a href="{{ node.absolute_url }}">"{{ node.absolute_url }}"</a>
           </div>
           {% if node.preview %}
           <div class="panel-heading white-bg">
-              <strong>Metadata Preview</strong>
+              <strong>Metadata Preview | {{ node.saveas }}</strong>
           </div>
           <div class="highlight">
               <pre>{{ node.preview }}</pre>

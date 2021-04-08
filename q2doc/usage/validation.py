@@ -2,7 +2,6 @@ import ast
 
 
 class BlockValidator(ast.NodeVisitor):
-
     def visit_FunctionDef(self, node):
         pass
 

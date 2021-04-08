@@ -14,7 +14,6 @@ from q2doc.usage.nodes import (
     UsageNode,
     UsageExampleNode,
     UsageDataNode,
-    UsageMetadataNode,
     FactoryNode,
 )
 from qiime2.plugins import ArtifactAPIUsage
@@ -140,13 +139,15 @@ def artifact_api(use, records, block, env):
             data_node = init_data_node(record)
             block['nodes'].append(data_node)
         elif source == "init_metadata":
-            metadata_node = init_metadata_node(record)
+            metadata_node = init_data_node(record)
             block['nodes'].append(metadata_node)
         elif source == "action":
+            # TODO If it's the first ExampleNode, include `import qiime2`
             node = block["nodes"][0]
+            setup_code = get_data_nodes(env)
             example = use.render()
             node.titles.append("Artifact API")
-            node.examples.append(example)
+            node.examples.append(setup_code + example)
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
             break
@@ -155,18 +156,19 @@ def artifact_api(use, records, block, env):
 def init_data_node(record):
     name = record.ref
     fname = f"{name}.qza"
-    artifact = MetaUsage.execution.value._get_record(name).result
-    stype = f"{artifact.type}"
-    load_statement = f"{name} = qiime2.Artifact.load('{fname}')"
-    node = UsageDataNode(stype, load_statement, name=name)
+    result = MetaUsage.execution.value._get_record(name).result
+    type_ = "Artifact" if isinstance(result, qiime2.Artifact) else "Metadata"
+    load_statement = f"{name} = qiime2.{type_}.load('{fname}')"
+    node = UsageDataNode(load_statement, name=name)
     return node
 
 
-def init_metadata_node(record):
-    name = record.ref
-    fname = f"{name}.qza"
-    metadata = MetaUsage.execution.value._get_record(name).result
-    load_statement = f"{name} = qiime2.Metadata.load('{fname}')"
-    metadata_preview = str(metadata.to_dataframe())
-    node = UsageMetadataNode(load_statement, metadata_preview, name=name)
-    return node
+def get_data_nodes(env):
+    setup_code = []
+    for block in env.usage_blocks:
+        nodes = block['nodes']
+        for node in nodes:
+            if isinstance(node, UsageDataNode) and not node.loaded:
+                setup_code.append(node.setup)
+                node.loaded = True
+    return '\n'.join(setup_code)

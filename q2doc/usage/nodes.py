@@ -28,31 +28,18 @@ class UsageExampleNode(UsageNode):
 
 
 class UsageDataNode(UsageNode):
-    def __init__(self, semantic_type, setup, *args, **kwargs):
+    def __init__(self, setup, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.semantic_type = semantic_type
         self.setup = setup
+        self.loaded = False
 
     @staticmethod
     def depart(translator, node):
-        template = jinja_env.get_template("init_data.html")
-        node.id = translator.document.settings.env.new_serialno('data_node')
-        rendered = template.render(node=node)
-        translator.body.append(rendered)
-
-
-class UsageMetadataNode(UsageNode):
-    def __init__(self, setup, preview, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.preview = preview
-        self.setup = setup
-
-    @staticmethod
-    def depart(translator, node):
-        template = jinja_env.get_template("init_metadata.html")
-        node.id = translator.document.settings.env.new_serialno('data_node')
-        rendered = template.render(node=node)
-        translator.body.append(rendered)
+        # template = jinja_env.get_template("init_data.html")
+        # node.id = translator.document.settings.env.new_serialno('data_node')
+        # rendered = template.render(node=node)
+        # translator.body.append(rendered)
+        pass
 
 
 class FactoryNode(UsageNode):
@@ -72,7 +59,6 @@ class FactoryNode(UsageNode):
         self.absolute_url = absolute_url
         self.saveas = saveas
         self.preview = preview
-
 
     @staticmethod
     def depart(translator, node):
