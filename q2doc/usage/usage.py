@@ -42,10 +42,14 @@ def process_usage_blocks(app, doctree, _):
 
 
 def update_nodes(doctree, env):
-    tree = doctree.traverse(UsageNode)
-    for block, tmp_node in zip(env.usage_blocks, tree):
+    for block, node in zip(env.usage_blocks, doctree.traverse(UsageNode)):
         nodes = block["nodes"]
-        tmp_node.replace_self(nodes)
+        node.replace_self(nodes)
+    for block, node in zip(env.usage_blocks, doctree.traverse(FactoryNode)):
+        result = MetaUsage.execution.value._get_record(node.ref).result
+        if isinstance(result, qiime2.metadata.metadata.Metadata):
+            metadata_preview = str(result.to_dataframe())
+            node.preview = metadata_preview
 
 
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
@@ -71,9 +75,13 @@ def factories_to_nodes(block, env):
     # are evaluated by ExecutionUsage.
     relative_url = f'results/{name}'
     absolute_url = f'{base}/{doc_name}/{relative_url}'
-    id_ = env.new_serialno()
-    dl_node = FactoryNode(id_=id_, relative_url=relative_url, absolute_url=absolute_url, saveas=name)
-    block["nodes"].append(dl_node)
+    factory_node = FactoryNode(
+        relative_url=relative_url,
+        absolute_url=absolute_url,
+        saveas=name,
+        ref=node.name,
+    )
+    block["nodes"].append(factory_node)
 
 
 @functools.singledispatch
@@ -129,11 +137,9 @@ def artifact_api(use, records, block, env):
     for record in records:
         source = record.source
         if source == "init_data":
-            block['nodes'].append(docutils.nodes.title(text=record.ref))
             data_node = init_data_node(record)
             block['nodes'].append(data_node)
         elif source == "init_metadata":
-            block['nodes'].append(docutils.nodes.title(text=record.ref))
             metadata_node = init_metadata_node(record)
             block['nodes'].append(metadata_node)
         elif source == "action":

@@ -4,7 +4,8 @@ from q2doc.usage.nodes import (
     UsageNode,
     UsageExampleNode,
     UsageDataNode,
-    UsageMetadataNode, FactoryNode,
+    UsageMetadataNode,
+    FactoryNode,
 )
 
 

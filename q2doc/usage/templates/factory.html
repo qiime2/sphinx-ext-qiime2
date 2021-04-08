@@ -1,21 +1,23 @@
-<div class="tabbed panel panel-default">
+<div class="panel panel-default">
   <div class="panel-heading white-bg">
-    Use the command below to download <a href="{{ node.relative_url }}">{{node.saveas }}</a>
+      Use the command below or click the link to download tutorial data.
   </div>
 
   <div class="panel-body">
-    <div class="tab-content">
-      <div role="tabpanel" class="tab-pane fade in active" id="wget-{{ node.id }}">
-        <div class="clearfix"></div>
-        <div class="highlight-shell">
+      <div class="highlight-shell">
           <div class="highlight">
-            <pre>wget \
-  -O "{{ node.saveas }}" \
-  <a href="{{ node.absolute_url }}">"{{ node.absolute_url }}"</a>
-            </pre>
+              <pre>
+wget <a href="{{ node.absolute_url }}">"{{ node.absolute_url }}"</a>
+              </pre>
           </div>
-        </div>
+          {% if node.preview %}
+          <div class="panel-heading white-bg">
+              <strong>Metadata Preview</strong>
+          </div>
+          <div class="highlight">
+              <pre>{{ node.preview }}</pre>
+          </div>
+          {% endif %}
       </div>
-    </div>
   </div>
 </div>

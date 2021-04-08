@@ -55,13 +55,24 @@ class UsageMetadataNode(UsageNode):
         translator.body.append(rendered)
 
 
-class FactoryNode(docutils.nodes.Element):
-    def __init__(self, id_, relative_url, absolute_url, saveas, *args, **kwargs):
+class FactoryNode(UsageNode):
+    def __init__(
+        self,
+        relative_url,
+        absolute_url,
+        saveas,
+        ref=None,
+        preview=None,
+        *args,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
-        self.id = id_
+        self.ref = ref
         self.relative_url = relative_url
         self.absolute_url = absolute_url
         self.saveas = saveas
+        self.preview = preview
+
 
     @staticmethod
     def depart(translator, node):
