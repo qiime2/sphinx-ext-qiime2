@@ -5,8 +5,6 @@ import os
 from pathlib import Path
 from typing import Tuple, Union
 
-import docutils
-
 import qiime2  # noqa: F401
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
@@ -44,7 +42,11 @@ def update_nodes(doctree, env):
     for block, node in zip(env.usage_blocks, doctree.traverse(UsageNode)):
         nodes = block["nodes"]
         node.replace_self(nodes)
-    for block, node in zip(env.usage_blocks, doctree.traverse(FactoryNode)):
+    for node in doctree.traverse(UsageExampleNode):
+        # Tack imports onto the first Example node.
+        node.artifact_api = node.insert_imports()
+        break
+    for node in doctree.traverse(FactoryNode):
         result = MetaUsage.execution.value._get_record(node.ref).result
         if isinstance(result, qiime2.metadata.metadata.Metadata):
             metadata_preview = str(result.to_dataframe())
@@ -122,9 +124,7 @@ def cli(use, records, block, env):
     for record in records:
         if record.source == "action":
             example = "".join(use.render())
-            node = UsageExampleNode(
-                titles=["Command Line"], examples=[example]
-            )
+            node = UsageExampleNode(cli=example)
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
             block["nodes"] = [node]
@@ -146,8 +146,7 @@ def artifact_api(use, records, block, env):
             node = block["nodes"][0]
             setup_code = get_data_nodes(env)
             example = use.render()
-            node.titles.append("Artifact API")
-            node.examples.append(setup_code + example)
+            node.artifact_api = setup_code + example
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
             break
@@ -158,7 +157,7 @@ def init_data_node(record):
     fname = f"{name}.qza"
     result = MetaUsage.execution.value._get_record(name).result
     type_ = "Artifact" if isinstance(result, qiime2.Artifact) else "Metadata"
-    load_statement = f"{name} = qiime2.{type_}.load('{fname}')"
+    load_statement = f"{name} = {type_}.load('{fname}')"
     node = UsageDataNode(load_statement, name=name)
     return node
 
@@ -171,4 +170,4 @@ def get_data_nodes(env):
             if isinstance(node, UsageDataNode) and not node.loaded:
                 setup_code.append(node.setup)
                 node.loaded = True
-    return '\n'.join(setup_code)
+    return '\n'.join(setup_code) + '\n\n'

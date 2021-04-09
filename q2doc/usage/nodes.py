@@ -13,15 +13,18 @@ class UsageNode(docutils.nodes.General, docutils.nodes.Element):
 
 
 class UsageExampleNode(UsageNode):
-    def __init__(self, titles=[], examples=[], *args, **kwargs):
+    def __init__(self, cli=None, artifact_api=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.titles = titles
-        self.examples = examples
+        self.cli = cli
+        self.artifact_api = artifact_api
+
+    def insert_imports(self):
+        imps = '\n'.join(['from qiime2 import Artifact',
+                         'from qiime2 import Metadata'])
+        return f'{imps}\n\n{self.artifact_api}'
 
     @staticmethod
     def depart(translator, node):
-        if not node.titles:
-            return
         template = jinja_env.get_template("example.html")
         rendered = template.render(node=node)
         translator.body.append(rendered)
