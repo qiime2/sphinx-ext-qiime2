@@ -18,10 +18,12 @@ class UsageExampleNode(UsageNode):
         self.cli = cli
         self.artifact_api = artifact_api
 
-    def insert_imports(self):
-        imps = '\n'.join(['from qiime2 import Artifact',
-                         'from qiime2 import Metadata'])
-        return f'{imps}\n\n{self.artifact_api}'
+    def prelude(self):
+        prelude = '\n'.join(
+            ['from qiime2 import Artifact',
+             'from qiime2 import Metadata']
+        )
+        return f'{prelude}\n\n{self.artifact_api}'
 
     @staticmethod
     def depart(translator, node):

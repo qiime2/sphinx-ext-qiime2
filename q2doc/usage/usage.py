@@ -44,7 +44,7 @@ def update_nodes(doctree, env):
         node.replace_self(nodes)
     for node in doctree.traverse(UsageExampleNode):
         # Tack imports onto the first Example node.
-        node.artifact_api = node.insert_imports()
+        node.artifact_api = node.prelude()
         break
     for node in doctree.traverse(FactoryNode):
         result = MetaUsage.execution.value._get_record(node.ref).result
