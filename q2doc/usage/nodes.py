@@ -33,14 +33,6 @@ class UsageDataNode(UsageNode):
         self.setup = setup
         self.loaded = False
 
-    @staticmethod
-    def depart(translator, node):
-        # template = jinja_env.get_template("init_data.html")
-        # node.id = translator.document.settings.env.new_serialno('data_node')
-        # rendered = template.render(node=node)
-        # translator.body.append(rendered)
-        pass
-
 
 class FactoryNode(UsageNode):
     def __init__(
