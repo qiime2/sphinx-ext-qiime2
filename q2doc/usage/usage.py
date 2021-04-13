@@ -120,7 +120,7 @@ def execution(use, records, block, env):
     for record in records:
         artifact = record.result
         path = os.path.join(out_dir, f'{record.ref}.qza')
-        if record.source == "init_metadata" or "init_data":
+        if record.source in ["init_metadata", "init_data"]:
             artifact.save(path)
 
 
