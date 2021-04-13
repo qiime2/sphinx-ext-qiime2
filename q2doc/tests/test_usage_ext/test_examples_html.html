@@ -4,8 +4,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QIIME 2 2021.2.0.dev0+16.g386e831 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>QIIME 2 2021.4.0.dev2+3.g386e831 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -32,9 +33,9 @@
           <div class="body" role="main">
             
   <div class="toctree-wrapper compound">
-<span id="document-examples"></span><div class="section" id="factories">
+<span id="document-examples"></span><section id="factories">
 <h1>Factories<a class="headerlink" href="#factories" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="ints">
+<section id="ints">
 <h2>Ints<a class="headerlink" href="#ints" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
@@ -111,8 +112,8 @@ $ wget <a href="http://localhost:8000/examples/results/int2.qza">"http://localho
           
       </div>
   </div>
-</div></div>
-<div class="section" id="mapping">
+</div></section>
+<section id="mapping">
 <h2>Mapping<a class="headerlink" href="#mapping" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
@@ -129,8 +130,8 @@ $ wget <a href="http://localhost:8000/examples/results/mapping1_factory.qza">"ht
           
       </div>
   </div>
-</div></div>
-<div class="section" id="metadata">
+</div></section>
+<section id="metadata">
 <h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
@@ -162,9 +163,9 @@ $ wget <a href="http://localhost:8000/examples/results/md2_factory.qza">"http://
           
       </div>
   </div>
-</div></div>
-</div>
-<div class="section" id="basic-usage">
+</div></section>
+</section>
+<section id="basic-usage">
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -192,6 +193,7 @@ $ wget <a href="http://localhost:8000/examples/results/md2_factory.qza">"http://
 
                 <div class="highlight">
                     <pre>$ # This example demonstrates basic usage.
+
 qiime dummy-plugin concatenate-ints \
     --i-ints1 ints_a.qza \
     --i-ints2 ints_b.qza \
@@ -223,8 +225,7 @@ ints_d, = concatenate_ints(
     ints3=ints_c,
     int1=4,
     int2=2,
-)
-</pre>
+)</pre>
                 </div>
                 </p>
                 <div class="clearfix"></div>
@@ -233,7 +234,89 @@ ints_d, = concatenate_ints(
             </div>
         </div>
     </div>
-</div></div>
+</div></section>
+<section id="chained-usage">
+<h1>Chained Usage<a class="headerlink" href="#chained-usage" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ # This example demonstrates chained usage (pt 1).
+
+qiime dummy-plugin concatenate-ints \
+    --i-ints1 ints_a.qza \
+    --i-ints2 ints_b.qza \
+    --i-ints3 ints_c.qza \
+    --p-int1 4 \
+    --p-int2 2 \
+    --o-concatenated-ints ints_d.qza
+
+# This example demonstrates chained usage (pt 2).
+
+qiime dummy-plugin concatenate-ints \
+    --i-ints1 ints_d.qza \
+    --i-ints2 ints_b.qza \
+    --i-ints3 ints_c.qza \
+    --p-int1 41 \
+    --p-int2 0 \
+    --o-concatenated-ints concatenated_ints.qza</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>
+
+# This example demonstrates chained usage (pt 1).
+ints_d, = concatenate_ints(
+    ints1=ints_a,
+    ints2=ints_b,
+    ints3=ints_c,
+    int1=4,
+    int2=2,
+)
+
+# This example demonstrates chained usage (pt 2).
+concatenated_ints, = concatenate_ints(
+    ints1=ints_d,
+    ints2=ints_b,
+    ints3=ints_c,
+    int1=41,
+    int2=0,
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 </div>
 
 
@@ -247,6 +330,7 @@ ints_d, = concatenate_ints(
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-examples">Factories</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#chained-usage">Chained Usage</a></li>
 </ul>
 
         </div>
@@ -257,7 +341,7 @@ ints_d, = concatenate_ints(
       &copy;2016-2020, QIIME 2 development team.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
