@@ -8,6 +8,7 @@ from typing import Tuple, Union
 from sphinx.util import logging
 
 import qiime2  # noqa: F401
+from qiime2 import Artifact, Metadata  # noqa: F401
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
 from q2doc.usage.nodes import (
