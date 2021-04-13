@@ -134,7 +134,7 @@ def get_docname(node):
 def cli(use, records, block, env):
     for record in records:
         if record.source == "action":
-            example = "".join(use.render())
+            example = "\n".join(use.render())
             node = UsageExampleNode(cli=example)
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
