@@ -93,3 +93,26 @@ Basic Usage
                        int2=2),
        use.UsageOutputNames(concatenated_ints='ints_d'),
    )
+
+Chained Usage
+===============
+.. usage::
+
+   use.comment('This example demonstrates chained usage (pt 1).')
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='concatenate_ints'),
+       use.UsageInputs(ints1=ints_a, ints2=ints_b, ints3=ints_c, int1=4,
+                       int2=2),
+       use.UsageOutputNames(concatenated_ints='ints_d'),
+   )
+
+   ints_d = use.get_result('ints_d')
+   use.comment('This example demonstrates chained usage (pt 2).')
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='concatenate_ints'),
+       use.UsageInputs(ints1=ints_d, ints2=ints_b, ints3=ints_c, int1=41,
+                       int2=0),
+       use.UsageOutputNames(concatenated_ints='concatenated_ints'),
+   )
