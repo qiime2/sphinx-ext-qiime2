@@ -17,6 +17,8 @@ class UsageDirective(SphinxDirective):
         env = self.state.document.settings.env
         if not hasattr(env, "usage_blocks"):
             env.usage_blocks = []
+        if not hasattr(env, "rendered"):
+            env.rendered = []
         factory = True if self.options.get('factory') else False
         name = self.options.get('name')
         node = UsageNode(factory=factory, name=name)

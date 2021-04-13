@@ -39,7 +39,8 @@ def process_usage_blocks(app, doctree, _):
             source = compile(tree, filename="<ast>", mode="exec")
             exec(source)
             new_records = get_new_records(use, processed_records)
-            records_to_nodes(use, new_records, block, env)
+            rendered = records_to_nodes(use, new_records, block, env)
+            env.rendered.append(rendered)
             update_processed_records(new_records, processed_records)
     update_nodes(doctree, env)
 
@@ -132,12 +133,13 @@ def execution(use, records, block, env):
 def cli(use, records, block, env):
     for record in records:
         if record.source == "action":
-            example = "\n".join(use.render())
+            example = "\n\n".join(use.render())
+            example = remove_rendered(example, env)
             node = UsageExampleNode(cli=example)
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
             block["nodes"] = [node]
-            break
+            return example
 
 
 @records_to_nodes.register(ArtifactAPIUsage)
@@ -155,10 +157,11 @@ def artifact_api(use, records, block, env):
             node = block["nodes"][0]
             setup_code = get_data_nodes(env)
             example = use.render()
+            example = remove_rendered(example, env)
             node.artifact_api = setup_code + example
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
-            break
+            return example
 
 
 def init_data_node(record):
@@ -180,3 +183,10 @@ def get_data_nodes(env):
                 setup_code.append(node.setup)
                 node.loaded = True
     return '\n'.join(setup_code) + '\n\n'
+
+
+def remove_rendered(example, env):
+    for rendered in env.rendered:
+        if rendered:
+            example = example.replace(rendered, '').strip()
+    return example
