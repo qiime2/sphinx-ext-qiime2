@@ -1,5 +1,5 @@
 Factories
----------
+=========
 
 Ints
 ----
@@ -75,6 +75,10 @@ Metadata
        return Metadata(pd.DataFrame({'b': ['4', '5', '6']},
                                    index=pd.Index(['0', '1', '2'],
                                                    name='id')))
+
+
+Basic Usage
+===========
 
 .. usage::
    ints_a = use.init_data('ints_a', ints1_factory)
