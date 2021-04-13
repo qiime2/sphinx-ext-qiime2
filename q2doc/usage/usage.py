@@ -21,6 +21,7 @@ from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
 
 from .meta_usage import MetaUsage
+from .utils import get_docname
 from .validation import BlockValidator
 
 logger = logging.getLogger(__name__)
@@ -122,12 +123,6 @@ def execution(use, records, block, env):
         path = os.path.join(out_dir, f'{record.ref}.qza')
         if record.source in ["init_metadata", "init_data"]:
             artifact.save(path)
-
-
-def get_docname(node):
-    root, doc_name = [Path(p) for p in Path(node.source).parts[-2:]]
-    doc_name = Path(doc_name.stem)
-    return root, doc_name
 
 
 @records_to_nodes.register(CLIUsage)
