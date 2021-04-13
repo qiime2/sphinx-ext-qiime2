@@ -46,10 +46,6 @@ author = 'QIIME 2 development team'
 version = qiime2.__release__
 release = qiime2.__version__
 language = None
-exclude_patterns = [
-    'sphinx_extensions/plugin_directory/templates',
-    'sphinx_extensions/command_block/templates',
-]
 pygments_style = 'sphinx'
 html_sidebars = {
     "**": ['globaltoc.html', 'searchbox.html']

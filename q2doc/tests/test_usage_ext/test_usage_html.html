@@ -4,8 +4,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cutadapt Tutorial &#8212; QIIME 2 2021.2.0.dev0+10.g6d8932e documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Cutadapt Tutorial &#8212; QIIME 2 2021.4.0.dev2+3.g386e831 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -31,9 +32,9 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="cutadapt-tutorial">
+  <section id="cutadapt-tutorial">
 <h1>Cutadapt Tutorial<a class="headerlink" href="#cutadapt-tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="download-and-import-data-used-in-this-tutorial">
+<section id="download-and-import-data-used-in-this-tutorial">
 <h2>Download and import data used in this tutorial<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -43,105 +44,39 @@ stored in <cite>data/</cite> will get download blocks generated automatically.</
 </div>
 <p>First, we declare data needed by the usage example that follows. This will render download elements.  At this point,
 we don’t mention anything driver-specific - just get the data.</p>
-<div class="tabbed panel panel-default">
+<div class="panel panel-default">
   <div class="panel-heading white-bg">
-    Use the command below to download tutorial data.
+      Use the command below or click the link to download multiplexed_sequences.qza.
   </div>
 
   <div class="panel-body">
-    <div class="tab-content">
-      <div role="tabpanel" class="tab-pane fade in active" id="wget-0">
-        <div class="clearfix"></div>
-        <div class="highlight-shell">
+      <div class="highlight-shell">
           <div class="highlight">
-            <pre>wget \
-  -O "multiplexed_sequences.qza" \
-  "http://localhost:8000/q2doc/cutadapt/results/multiplexed_sequences.qza"</pre>
+              <pre>
+$ wget <a href="http://localhost:8000/cutadapt/results/multiplexed_sequences.qza">"http://localhost:8000/cutadapt/results/multiplexed_sequences.qza"</a>
+              </pre>
           </div>
-        </div>
+          
       </div>
-    </div>
   </div>
-</div><div class="tabbed panel panel-default">
+</div><div class="panel panel-default">
   <div class="panel-heading white-bg">
-    Use the command below to download tutorial data.
+      Use the command below or click the link to download metadata.qza.
   </div>
 
   <div class="panel-body">
-    <div class="tab-content">
-      <div role="tabpanel" class="tab-pane fade in active" id="wget-1">
-        <div class="clearfix"></div>
-        <div class="highlight-shell">
+      <div class="highlight-shell">
           <div class="highlight">
-            <pre>wget \
-  -O "metadata.qza" \
-  "http://localhost:8000/q2doc/cutadapt/results/metadata.qza"</pre>
+              <pre>
+$ wget <a href="http://localhost:8000/cutadapt/results/metadata.qza">"http://localhost:8000/cutadapt/results/metadata.qza"</a>
+              </pre>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><p>The data here consists of single-end reads (6 reads total). There are two
-samples present in the data, with the following barcodes on the 5’ end:</p>
-<h2>multiplexed_sequences<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
-<div class="tabbed panel panel-default">
-    <div class="panel-body">
-        <ul class="nav nav-tabs gray-bg" role="tablist">
-            <li role="presentation" class="active">
-                <a href="#artifact-api-0" aria-controls="artifact-api-0" role="tab" data-toggle="tab">
-                    Artifact API
-                </a>
-            </li>
-        </ul>
-
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane fade in active" id="artifact-api-0">
-                <p>
-                    <strong>Load <code>MultiplexedSingleEndBarcodeInSequence</code></strong>
-
-                <div class="highlight">
-                    <pre>multiplexed_sequences = qiime2.Artifact.load('multiplexed_sequences.qza')</pre>
-                </div>
-                </p>
-                <div class="clearfix"></div>
-                <div class="highlight-shell">
-                </div>
-            </div>
-        </div>
-    </div>
-</div><h2>metadata<a class="headerlink" href="#download-and-import-data-used-in-this-tutorial" title="Permalink to this headline">¶</a></h2>
-<div class="tabbed panel panel-default">
-    <div class="panel-body">
-        <ul class="nav nav-tabs gray-bg" role="tablist">
-            <li role="presentation">
-                <a href="#artifact-api-1" aria-controls="artifact-api-1" role="tab" data-toggle="tab">
-                    Artifact API
-                </a>
-            </li>
-            <li role="presentation" class="active">
-                <a href="#preview-1" aria-controls="preview-1" role="tab" data-toggle="tab">
-                    Preview Metadata
-                </a>
-            </li>
-        </ul>
-
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane fade" id="artifact-api-1">
-                <p>
-                    <strong>Load Metadata</strong>
-
-                <div class="highlight">
-                    <pre>metadata = qiime2.Metadata.load('metadata.qza')</pre>
-                </div>
-                </p>
-                <div class="clearfix"></div>
-                <div class="highlight-shell">
-                </div>
-            </div>
-            <div role="tabpanel" class="tab-pane fade in active" id="preview-1">
-                <p>
-                <div class="highlight">
-                    <pre>               barcodes
+          
+          <div class="panel-heading white-bg">
+              <strong>Metadata Preview | metadata.qza</strong>
+          </div>
+          <div class="highlight">
+              <pre>               barcodes
 sample-id              
 L1S8       AGCTGACTAGTC
 L1S57      ACACACTATGGC
@@ -155,13 +90,14 @@ L3S242     ACAGTTGCGCGA
 L3S294     CACGACAGGCTA
 L3S313     AGTGTCACGGTG
 L3S341     CAAGTGAGAGAG</pre>
-                </div>
-                </p>
-            </div>
-        </div>
-    </div>
-</div></div>
-<div class="section" id="demultiplex-the-reads">
+          </div>
+          
+      </div>
+  </div>
+</div><p>The data here consists of single-end reads (6 reads total). There are two
+samples present in the data, with the following barcodes on the 5’ end:</p>
+</section>
+<section id="demultiplex-the-reads">
 <h2>Demultiplex the reads<a class="headerlink" href="#demultiplex-the-reads" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have everything imported, let’s do the thing:</p>
 <div class="tabbed panel panel-default">
@@ -186,10 +122,10 @@ L3S341     CAAGTGAGAGAG</pre>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
                 <p>
-                    <strong>Command Line</strong>
+                    <strong>Command Line Interface</strong>
 
                 <div class="highlight">
-                    <pre>qiime cutadapt demux-single \
+                    <pre>$ qiime cutadapt demux-single \
     --i-seqs multiplexed_sequences.qza \
     --p-error-rate 0 \
     --m-barcodes-file metadata.tsv \
@@ -204,7 +140,13 @@ L3S341     CAAGTGAGAGAG</pre>
                     <strong>Artifact API</strong>
 
                 <div class="highlight">
-                    <pre>from qiime2.plugins.cutadapt.methods import demux_single
+                    <pre>from qiime2 import Artifact
+from qiime2 import Metadata
+
+multiplexed_sequences = Artifact.load('multiplexed_sequences.qza')
+metadata = Metadata.load('metadata.qza')
+
+from qiime2.plugins.cutadapt.methods import demux_single
 
 barcodes = metadata.get_column('barcodes')
 
@@ -223,8 +165,8 @@ demultiplexed_seqs, untrimmed = demux_single(
         </div>
     </div>
 </div><p>As you can see - the reads are now demuxed. Enjoy!</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -253,7 +195,7 @@ demultiplexed_seqs, untrimmed = demux_single(
       &copy;2016-2020, QIIME 2 development team.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

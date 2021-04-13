@@ -128,8 +128,8 @@ def test_get_new_records(drivers_with_initialized_data):
     assert result == tuple()
 
 
-@pytest.mark.sphinx(buildername='dirhtml', testroot="q2doc", freshenv=True)
-def test_usage_html(app, file_regression):
+@pytest.mark.sphinx(buildername='dirhtml', testroot="cutadapt", freshenv=True)
+def test_cutadapt_html(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
