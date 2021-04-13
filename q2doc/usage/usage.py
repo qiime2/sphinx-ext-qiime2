@@ -71,6 +71,9 @@ def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
     new_record_keys = [k for k in records.keys() if k not in processed_records]
     if new_record_keys:
         new_records = operator.itemgetter(*new_record_keys)(records)
+        new_records = ((new_records, )
+                       if not isinstance(new_records, tuple)
+                       else new_records)
     return new_records
 
 
