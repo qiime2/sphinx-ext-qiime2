@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from typing import Tuple, Union
 
+from sphinx.util import logging
+
 import qiime2  # noqa: F401
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
@@ -19,6 +21,8 @@ from qiime2.sdk.usage import ScopeRecord
 
 from .meta_usage import MetaUsage
 from .validation import BlockValidator
+
+logger = logging.getLogger(__name__)
 
 
 def process_usage_blocks(app, doctree, _):
@@ -47,10 +51,16 @@ def update_nodes(doctree, env):
         node.artifact_api = node.prelude()
         break
     for node in doctree.traverse(FactoryNode):
-        result = MetaUsage.execution.value._get_record(node.ref).result
-        if isinstance(result, qiime2.metadata.metadata.Metadata):
-            metadata_preview = str(result.to_dataframe())
-            node.preview = metadata_preview
+        ref = node.ref
+        try:
+            result = MetaUsage.execution.value._get_record(ref).result
+            if isinstance(result, qiime2.metadata.metadata.Metadata):
+                metadata_preview = str(result.to_dataframe())
+                node.preview = metadata_preview
+        except KeyError as e:
+            logger.warning(
+                f"Factory `{ref}` is not used in any Usage examples: {e}"
+            )
 
 
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
