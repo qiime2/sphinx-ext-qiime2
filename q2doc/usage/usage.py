@@ -126,6 +126,9 @@ def execution(use, records, block, env):
     if not out_dir.exists():
         out_dir.mkdir(parents=True)
     if block["nodes"][0].factory:
+        # TODO When factories that rely on an object that is imported  somewhere
+        #  in a usage black are called, they fail.  Current workaround can be
+        #  in examples.rst is to import requirements in the factory body.
         factories_to_nodes(block, env)
     for record in records:
         artifact = record.result
@@ -142,9 +145,9 @@ def cli(use, records, block, env):
             example = remove_rendered(rendered, env.rendered['cli'])
             env.rendered['cli'] = rendered
             node = UsageExampleNode(cli=example)
+            block["nodes"] = [node]
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
-            block["nodes"] = [node]
             break
 
 
