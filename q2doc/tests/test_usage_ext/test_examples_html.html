@@ -630,6 +630,69 @@ out3, = identity_with_metadata_column(
         </div>
     </div>
 </div></section>
+<section id="variadic-input-simple">
+<h1>Variadic Input Simple<a class="headerlink" href="#variadic-input-simple" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ qiime dummy-plugin variadic-input-method \
+    --i-ints ints_a.qza \
+    --i-ints ints_b.qza \
+    --i-int-set single_int1.qza \
+    --i-int-set single_int2.qza \
+    --p-nums 7 \
+    --p-nums 8 \
+    --p-nums 9 \
+    --o-output out4.qza</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>single_int1 = Artifact.load('single_int1.qza')
+single_int2 = Artifact.load('single_int2.qza')
+
+from qiime2.plugins.dummy_plugin.methods import variadic_input_method
+
+out4, = variadic_input_method(
+    ints=[ints_a, ints_b],
+    int_set={single_int1, single_int2},
+    nums={8, 9, 7},
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 </div>
 
 
@@ -649,6 +712,7 @@ out3, = identity_with_metadata_column(
 <li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-simple">Identity with Metadata Simple</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-merging">Identity with Metadata Merging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-column-get-mdc">Identity With Metadata Column Get MDC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#variadic-input-simple">Variadic Input Simple</a></li>
 </ul>
 
         </div>

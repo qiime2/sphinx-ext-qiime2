@@ -217,3 +217,23 @@ Identity With Metadata Column Get MDC
        use.UsageInputs(ints=ints, metadata=mdc),
        use.UsageOutputNames(out='out3'),
    )
+
+
+Variadic Input Simple
+====================
+
+.. usage::
+
+   int_collection = use.init_data_collection('int_collection', list, ints_a, ints_b)
+
+   single_int1 = use.init_data('single_int1', single_int1_factory)
+   single_int2 = use.init_data('single_int2', single_int2_factory)
+   int_set = use.init_data_collection('int_set', set, single_int1,
+                                      single_int2)
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='variadic_input_method'),
+       use.UsageInputs(ints=int_collection, int_set=int_set, nums={7, 8, 9}),
+       use.UsageOutputNames(output='out4'),
+   )
