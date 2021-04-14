@@ -170,3 +170,19 @@ Complex Pipeline
        path='ints.txt',
        expression='1',
    )
+
+
+Identity with Metadata Simple
+=============================
+
+.. usage::
+
+   ints = use.init_data('ints', ints1_factory)
+   md = use.init_metadata('md', md1_factory)
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='identity_with_metadata'),
+       use.UsageInputs(ints=ints, metadata=md),
+       use.UsageOutputNames(out='out'),
+   )

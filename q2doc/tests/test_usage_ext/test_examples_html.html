@@ -366,7 +366,6 @@ mapper = Artifact.load('mapper.qza')
 
 from qiime2.plugins.dummy_plugin.pipelines import typical_pipeline
 
-
 out_map, left, right, left_viz, right_viz = typical_pipeline(
     int_sequence=ints,
     mapping=mapper,
@@ -458,6 +457,62 @@ out_map2, left2, right2, left_viz2, right_viz2 = typical_pipeline(
         </div>
     </div>
 </div></section>
+<section id="identity-with-metadata-simple">
+<h1>Identity with Metadata Simple<a class="headerlink" href="#identity-with-metadata-simple" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ qiime dummy-plugin identity-with-metadata \
+    --i-ints ints.qza \
+    --m-metadata-file md.tsv \
+    --o-out out.qza</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>md = Metadata.load('md.qza')
+
+from qiime2.plugins.dummy_plugin.methods import identity_with_metadata
+
+out, = identity_with_metadata(
+    ints=ints,
+    metadata=md,
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 </div>
 
 
@@ -474,6 +529,7 @@ out_map2, left2, right2, left_viz2, right_viz2 = typical_pipeline(
 <li class="toctree-l1"><a class="reference internal" href="index.html#chained-usage">Chained Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#simple-pipeline">Simple Pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#complex-pipeline">Complex Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-simple">Identity with Metadata Simple</a></li>
 </ul>
 
         </div>

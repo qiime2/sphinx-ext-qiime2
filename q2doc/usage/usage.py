@@ -2,12 +2,14 @@ import ast
 import functools
 import operator
 import os
+import re
 from pathlib import Path
 from typing import Tuple, Union
 
 from sphinx.util import logging
 
 import qiime2  # noqa: F401
+import pandas as pd  # noqa: F401
 from qiime2 import Artifact, Metadata  # noqa: F401
 import qiime2.sdk.usage as usage
 from q2cli.core.usage import CLIUsage
@@ -187,13 +189,13 @@ def get_data_nodes(env):
 
 
 def remove_rendered(example, rendered):
-    imports = '\n\n'.join(
-        [line for line in rendered.splitlines() if 'import' in line]
-    )
+    imports = [line for line in rendered.splitlines() if 'import' in line]
     query = '\n'.join(
         [line for line in rendered.splitlines() if 'import' not in line]
     ).strip()
     example = example.replace(query, '').strip()
-    example = example.replace(imports, '').strip()
-    example = example.replace('\n\n\n', '\n\n').strip()
+    for imp in imports:
+        example = example.replace(imp, '').strip()
+    p = re.compile('\n\n+')
+    example = p.sub('\n\n', example).strip()
     return example
