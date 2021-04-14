@@ -20,8 +20,7 @@ class UsageExampleNode(UsageNode):
 
     def prelude(self):
         prelude = '\n'.join(
-            ['from qiime2 import Artifact',
-             'from qiime2 import Metadata']
+            ['from qiime2 import Artifact', 'from qiime2 import Metadata']
         )
         return f'{prelude}\n\n{self.artifact_api}'
 
@@ -48,7 +47,7 @@ class FactoryNode(UsageNode):
         ref=None,
         preview=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.ref = ref
