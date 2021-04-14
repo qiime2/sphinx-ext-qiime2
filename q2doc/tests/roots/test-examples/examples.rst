@@ -116,3 +116,22 @@ Chained Usage
                        int2=0),
        use.UsageOutputNames(concatenated_ints='concatenated_ints'),
    )
+
+
+Simple Pipeline
+================
+
+.. usage::
+   ints = use.init_data('ints', ints1_factory)
+   mapper = use.init_data('mapper', mapping1_factory)
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='typical_pipeline'),
+       use.UsageInputs(int_sequence=ints, mapping=mapper,
+                       do_extra_thing=True),
+       use.UsageOutputNames(out_map='out_map', left='left', right='right',
+                            left_viz='left_viz', right_viz='right_viz')
+   )
+
+

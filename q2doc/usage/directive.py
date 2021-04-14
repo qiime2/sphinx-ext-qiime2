@@ -18,7 +18,7 @@ class UsageDirective(SphinxDirective):
         if not hasattr(env, "usage_blocks"):
             env.usage_blocks = []
         if not hasattr(env, "rendered"):
-            env.rendered = []
+            env.rendered = {'cli': '', 'art_api': ''}
         factory = True if self.options.get('factory') else False
         name = self.options.get('name')
         node = UsageNode(factory=factory, name=name)

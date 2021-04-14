@@ -317,6 +317,152 @@ concatenated_ints, = concatenate_ints(
         </div>
     </div>
 </div></section>
+<section id="simple-pipeline">
+<h1>Simple Pipeline<a class="headerlink" href="#simple-pipeline" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ qiime dummy-plugin typical-pipeline \
+    --i-int-sequence ints.qza \
+    --i-mapping mapper.qza \
+    --p-do-extra-thing True \
+    --o-out-map out_map.qza \
+    --o-left left.qza \
+    --o-right right.qza \
+    --o-left-viz left_viz.qzv \
+    --o-right-viz right_viz.qzv</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>ints = Artifact.load('ints.qza')
+mapper = Artifact.load('mapper.qza')
+
+from qiime2.plugins.dummy_plugin.pipelines import typical_pipeline
+
+
+out_map, left, right, left_viz, right_viz = typical_pipeline(
+    int_sequence=ints,
+    mapping=mapper,
+    do_extra_thing=True,
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
+<section id="complex-pipeline">
+<h1>Complex Pipeline<a class="headerlink" href="#complex-pipeline" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ qiime dummy-plugin typical-pipeline \
+    --i-int-sequence ints1.qza \
+    --i-mapping mapper1.qza \
+    --p-do-extra-thing True \
+    --o-out-map out_map1.qza \
+    --o-left left1.qza \
+    --o-right right1.qza \
+    --o-left-viz left_viz1.qzv \
+    --o-right-viz right_viz1.qzv
+
+qiime dummy-plugin typical-pipeline \
+    --i-int-sequence left1.qza \
+    --i-mapping out_map1.qza \
+    --p-do-extra-thing False \
+    --o-out-map out_map2.qza \
+    --o-left left2.qza \
+    --o-right right2.qza \
+    --o-left-viz left_viz2.qzv \
+    --o-right-viz right_viz2.qzv</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>ints1 = Artifact.load('ints1.qza')
+mapper1 = Artifact.load('mapper1.qza')
+
+from qiime2.plugins.dummy_plugin.methods import concatenate_ints
+
+from qiime2.plugins.dummy_plugin.pipelines import typical_pipeline
+
+
+out_map1, left1, right1, left_viz1, right_viz1 = typical_pipeline(
+    int_sequence=ints1,
+    mapping=mapper1,
+    do_extra_thing=True,
+)
+
+out_map2, left2, right2, left_viz2, right_viz2 = typical_pipeline(
+    int_sequence=left1,
+    mapping=out_map1,
+    do_extra_thing=False,
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 </div>
 
 
@@ -331,6 +477,8 @@ concatenated_ints, = concatenate_ints(
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-examples">Factories</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#basic-usage">Basic Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#chained-usage">Chained Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#simple-pipeline">Simple Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#complex-pipeline">Complex Pipeline</a></li>
 </ul>
 
         </div>

@@ -39,8 +39,7 @@ def process_usage_blocks(app, doctree, _):
             source = compile(tree, filename="<ast>", mode="exec")
             exec(source)
             new_records = get_new_records(use, processed_records)
-            rendered = records_to_nodes(use, new_records, block, env)
-            env.rendered.append(rendered)
+            records_to_nodes(use, new_records, block, env)
             update_processed_records(new_records, processed_records)
     update_nodes(doctree, env)
 
@@ -133,13 +132,14 @@ def execution(use, records, block, env):
 def cli(use, records, block, env):
     for record in records:
         if record.source == "action":
-            example = "\n\n".join(use.render())
-            example = remove_rendered(example, env)
+            rendered = "\n\n".join(use.render())
+            example = remove_rendered(rendered, env.rendered['cli'])
+            env.rendered['cli'] = rendered
             node = UsageExampleNode(cli=example)
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
             block["nodes"] = [node]
-            return example
+            break
 
 
 @records_to_nodes.register(ArtifactAPIUsage)
@@ -156,12 +156,13 @@ def artifact_api(use, records, block, env):
             # TODO If it's the first ExampleNode, include `import qiime2`
             node = block["nodes"][0]
             setup_code = get_data_nodes(env)
-            example = use.render()
-            example = remove_rendered(example, env)
+            rendered = use.render()
+            example = remove_rendered(rendered, env.rendered['art_api'])
+            env.rendered['art_api'] = rendered
             node.artifact_api = setup_code + example
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
-            return example
+            break
 
 
 def init_data_node(record):
@@ -185,8 +186,14 @@ def get_data_nodes(env):
     return '\n'.join(setup_code) + '\n\n'
 
 
-def remove_rendered(example, env):
-    for rendered in env.rendered:
-        if rendered:
-            example = example.replace(rendered, '').strip()
+def remove_rendered(example, rendered):
+    imports = '\n'.join(
+        [line for line in rendered.splitlines() if 'import' in line]
+    )
+    query = '\n'.join(
+        [line for line in rendered.splitlines() if 'import' not in line]
+    ).strip()
+    example = example.replace(query, '').strip()
+    example = example.replace(imports, '').strip()
+    example = example.replace('\n\n\n', '\n\n').strip()
     return example
