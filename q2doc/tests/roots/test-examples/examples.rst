@@ -177,7 +177,6 @@ Identity with Metadata Simple
 
 .. usage::
 
-   ints = use.init_data('ints', ints1_factory)
    md = use.init_metadata('md', md1_factory)
 
    use.action(
@@ -185,4 +184,21 @@ Identity with Metadata Simple
                        action_id='identity_with_metadata'),
        use.UsageInputs(ints=ints, metadata=md),
        use.UsageOutputNames(out='out'),
+   )
+
+
+Identity with Metadata Merging
+==============================
+
+.. usage::
+
+   md1 = use.init_metadata('md1', md1_factory)
+   md2 = use.init_metadata('md2', md2_factory)
+   md3 = use.merge_metadata('md3', md1, md2)
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='identity_with_metadata'),
+       use.UsageInputs(ints=ints, metadata=md3),
+       use.UsageOutputNames(out='out2'),
    )

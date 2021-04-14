@@ -70,6 +70,10 @@ def update_nodes(doctree, env):
 def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
     new_records = tuple()
     records = use._get_records()
+    # TODO This won't account for new records that overwrite a previously used
+    #  var name
+    # TODO If the output name of a record produced by an action is the same as
+    #  a previously used name, it will get skipped.
     new_record_keys = [k for k in records.keys() if k not in processed_records]
     if new_record_keys:
         new_records = operator.itemgetter(*new_record_keys)(records)
@@ -190,6 +194,8 @@ def get_data_nodes(env):
 
 def remove_rendered(example, rendered):
     imports = [line for line in rendered.splitlines() if 'import' in line]
+    # TODO Don't remove previously rendered variable binding in case the same
+    #   name is overwritten
     query = '\n'.join(
         [line for line in rendered.splitlines() if 'import' not in line]
     ).strip()

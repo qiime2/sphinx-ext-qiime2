@@ -513,6 +513,64 @@ out, = identity_with_metadata(
         </div>
     </div>
 </div></section>
+<section id="identity-with-metadata-merging">
+<h1>Identity with Metadata Merging<a class="headerlink" href="#identity-with-metadata-merging" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ qiime dummy-plugin identity-with-metadata \
+    --i-ints ints.qza \
+    --m-metadata-file md1.tsv \
+    --m-metadata-file md2.tsv \
+    --o-out out2.qza</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>md1 = Metadata.load('md1.qza')
+md2 = Metadata.load('md2.qza')
+
+md3 = md1.merge(md2)
+
+out2, = identity_with_metadata(
+    ints=ints,
+    metadata=md3,
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 </div>
 
 
@@ -530,6 +588,7 @@ out, = identity_with_metadata(
 <li class="toctree-l1"><a class="reference internal" href="index.html#simple-pipeline">Simple Pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#complex-pipeline">Complex Pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-simple">Identity with Metadata Simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-merging">Identity with Metadata Merging</a></li>
 </ul>
 
         </div>
