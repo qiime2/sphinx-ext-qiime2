@@ -693,6 +693,100 @@ out4, = variadic_input_method(
         </div>
     </div>
 </div></section>
+<section id="optional-inputs">
+<h1>Optional Inputs<a class="headerlink" href="#optional-inputs" title="Permalink to this headline">¶</a></h1>
+<div class="tabbed panel panel-default">
+    <div class="panel-heading white-bg">
+        Choose your interface:
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-tabs gray-bg" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#cli-1" aria-controls="cli-1" role="tab" data-toggle="tab">
+                    CLI
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#api-2" aria-controls="api-2" role="tab" data-toggle="tab">
+                    Artifact API
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cli-1">
+                <p>
+                    <strong>Command Line Interface</strong>
+
+                <div class="highlight">
+                    <pre>$ qiime dummy-plugin optional-artifacts-method \
+    --i-ints ints_a.qza \
+    --p-num1 1 \
+    --o-output output5.qza
+
+qiime dummy-plugin optional-artifacts-method \
+    --i-ints ints_a.qza \
+    --p-num1 1 \
+    --p-num2 2 \
+    --o-output output6.qza
+
+qiime dummy-plugin optional-artifacts-method \
+    --i-ints ints_a.qza \
+    --p-num1 1 \
+    --p-num2 None \
+    --o-output ints_b.qza
+
+qiime dummy-plugin optional-artifacts-method \
+    --i-ints ints_a.qza \
+    --i-optional1 ints_b.qza \
+    --p-num1 3 \
+    --p-num2 4 \
+    --o-output output7.qza</pre>
+                </div>
+                </p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="api-2">
+                <p>
+                    <strong>Artifact API</strong>
+
+                <div class="highlight">
+                    <pre>
+
+from qiime2.plugins.dummy_plugin.methods import optional_artifacts_method
+
+output5, = optional_artifacts_method(
+    ints=ints_a,
+    num1=1,
+)
+
+output6, = optional_artifacts_method(
+    ints=ints_a,
+    num1=1,
+    num2=2,
+)
+
+ints_b, = optional_artifacts_method(
+    ints=ints_a,
+    num1=1,
+    num2=None,
+)
+
+output7, = optional_artifacts_method(
+    ints=ints_a,
+    num1=3,
+    optional1=ints_b,
+    num2=4,
+)</pre>
+                </div>
+                </p>
+                <div class="clearfix"></div>
+                <div class="highlight-shell">
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 </div>
 
 
@@ -713,6 +807,7 @@ out4, = variadic_input_method(
 <li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-merging">Identity with Metadata Merging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#identity-with-metadata-column-get-mdc">Identity With Metadata Column Get MDC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#variadic-input-simple">Variadic Input Simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#optional-inputs">Optional Inputs</a></li>
 </ul>
 
         </div>

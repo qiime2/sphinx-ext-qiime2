@@ -220,7 +220,7 @@ Identity With Metadata Column Get MDC
 
 
 Variadic Input Simple
-====================
+=====================
 
 .. usage::
 
@@ -236,4 +236,41 @@ Variadic Input Simple
                        action_id='variadic_input_method'),
        use.UsageInputs(ints=int_collection, int_set=int_set, nums={7, 8, 9}),
        use.UsageOutputNames(output='out4'),
+   )
+
+
+
+Optional Inputs
+===============
+
+.. usage::
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='optional_artifacts_method'),
+       use.UsageInputs(ints=ints_a, num1=1),
+       use.UsageOutputNames(output='output5'),
+   )
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='optional_artifacts_method'),
+       use.UsageInputs(ints=ints_a, num1=1, num2=2),
+       use.UsageOutputNames(output='output6'),
+   )
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='optional_artifacts_method'),
+       use.UsageInputs(ints=ints_a, num1=1, num2=None),
+       use.UsageOutputNames(output='ints_b'),
+   )
+
+   optional1 = use.get_result('ints_b')
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='optional_artifacts_method'),
+       use.UsageInputs(ints=ints_a, optional1=optional1, num1=3, num2=4),
+       use.UsageOutputNames(output='output7'),
    )
