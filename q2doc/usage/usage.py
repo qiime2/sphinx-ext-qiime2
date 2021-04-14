@@ -164,7 +164,6 @@ def artifact_api(use, records, block, env):
             metadata_node = init_data_node(record)
             block['nodes'].append(metadata_node)
         elif source == "action":
-            # TODO If it's the first ExampleNode, include `import qiime2`
             node = block["nodes"][0]
             setup_code = get_data_nodes(env)
             rendered = use.render()
@@ -204,10 +203,10 @@ def remove_rendered(example, rendered):
     query = '\n'.join(
         [line for line in rendered.splitlines() if 'import' not in line]
     ).strip()
-    example = example.replace(query, '').strip()
+    example = example.replace(query, '')
     for imp in imports:
         p = re.compile(fr'{imp}\n')
-        example = p.sub('', example, count=1).strip()
+        example = p.sub('', example, count=1)
     p = re.compile('\n\n+')
     example = p.sub('\n\n', example).strip()
     return example
