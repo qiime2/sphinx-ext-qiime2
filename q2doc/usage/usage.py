@@ -201,7 +201,8 @@ def remove_rendered(example, rendered):
     ).strip()
     example = example.replace(query, '').strip()
     for imp in imports:
-        example = example.replace(imp, '').strip()
+        p = re.compile(imp)
+        example = p.sub('', example, count=1).strip()
     p = re.compile('\n\n+')
     example = p.sub('\n\n', example).strip()
     return example

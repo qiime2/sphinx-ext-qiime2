@@ -202,3 +202,18 @@ Identity with Metadata Merging
        use.UsageInputs(ints=ints, metadata=md3),
        use.UsageOutputNames(out='out2'),
    )
+
+
+Identity With Metadata Column Get MDC
+=====================================
+
+.. usage::
+
+   mdc = use.get_metadata_column('a', md)
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='identity_with_metadata_column'),
+       use.UsageInputs(ints=ints, metadata=mdc),
+       use.UsageOutputNames(out='out3'),
+   )
