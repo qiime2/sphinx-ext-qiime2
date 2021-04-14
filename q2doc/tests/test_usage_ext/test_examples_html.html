@@ -438,11 +438,6 @@ qiime dummy-plugin typical-pipeline \
                     <pre>ints1 = Artifact.load('ints1.qza')
 mapper1 = Artifact.load('mapper1.qza')
 
-from qiime2.plugins.dummy_plugin.methods import concatenate_ints
-
-from qiime2.plugins.dummy_plugin.pipelines import typical_pipeline
-
-
 out_map1, left1, right1, left_viz1, right_viz1 = typical_pipeline(
     int_sequence=ints1,
     mapping=mapper1,

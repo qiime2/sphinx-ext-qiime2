@@ -135,3 +135,38 @@ Simple Pipeline
    )
 
 
+Complex Pipeline
+================
+
+.. usage::
+
+   ints1 = use.init_data('ints1', ints1_factory)
+   mapper1 = use.init_data('mapper1', mapping1_factory)
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='typical_pipeline'),
+       use.UsageInputs(int_sequence=ints1, mapping=mapper1,
+                       do_extra_thing=True),
+       use.UsageOutputNames(out_map='out_map1', left='left1', right='right1',
+                            left_viz='left_viz1', right_viz='right_viz1')
+   )
+
+   ints2 = use.get_result('left1')
+   mapper2 = use.get_result('out_map1')
+
+   use.action(
+       use.UsageAction(plugin_id='dummy_plugin',
+                       action_id='typical_pipeline'),
+       use.UsageInputs(int_sequence=ints2, mapping=mapper2,
+                       do_extra_thing=False),
+       use.UsageOutputNames(out_map='out_map2', left='left2', right='right2',
+                            left_viz='left_viz2', right_viz='right_viz2')
+   )
+
+   right2 = use.get_result('right2')
+   right2.assert_has_line_matching(
+       label='a nice label about this assertion',
+       path='ints.txt',
+       expression='1',
+   )

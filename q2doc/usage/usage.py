@@ -187,7 +187,7 @@ def get_data_nodes(env):
 
 
 def remove_rendered(example, rendered):
-    imports = '\n'.join(
+    imports = '\n\n'.join(
         [line for line in rendered.splitlines() if 'import' in line]
     )
     query = '\n'.join(
