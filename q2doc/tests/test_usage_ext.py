@@ -145,6 +145,21 @@ def test_examples_html(app, file_regression):
     file_regression.check(build_result.read_text(), extension=".html")
 
 
+@pytest.mark.sphinx(buildername='singlehtml', testroot="mystery-stew", freshenv=True)
+def test_mystery_stew(app, file_regression):
+    from q2_mystery_stew.plugin_setup import create_plugin
+    from qiime2.sdk import PluginManager
+
+    plugin = create_plugin()
+    pm = PluginManager(add_plugins=False)
+    pm.add_plugin(plugin)
+
+    app.build()
+    assert app.statuscode == 0
+    build_result = app.outdir / 'index.html'
+    file_regression.check(build_result.read_text(), extension=".html")
+
+
 @pytest.mark.sphinx(buildername='html', testroot="q2doc", freshenv=True)
 def test_command_block_html(app):
     app.build()
