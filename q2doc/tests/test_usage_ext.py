@@ -160,8 +160,9 @@ def test_mystery_stew(app, file_regression):
     file_regression.check(build_result.read_text(), extension=".html")
 
 
-@pytest.mark.sphinx(buildername='html', testroot="q2doc", freshenv=True)
-def test_command_block_html(app):
+def test_mystery_stew_examples(mystery_stew, file_regression):
+    app = mystery_stew
     app.build()
     assert app.statuscode == 0
-    assert 'q2doc.command_block' in app.extensions
+    build_result = app.outdir / 'index.html'
+    file_regression.check(build_result.read_text(), extension=".html")

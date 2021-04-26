@@ -1,3 +1,5 @@
+from sphinx.application import Sphinx
+
 from q2doc.usage.usage import process_usage_blocks
 from q2doc.usage.directive import UsageDirective
 from q2doc.usage.nodes import (
@@ -8,7 +10,7 @@ from q2doc.usage.nodes import (
 )
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_config_value('base_url', 'http://localhost:8000/', 'html')
     app.add_directive("usage", UsageDirective)
     app.add_node(UsageNode, html=(_, _))
