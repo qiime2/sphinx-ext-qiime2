@@ -1,167 +1,91 @@
-import itertools
 import pathlib
-from unittest.mock import Mock
 
 import pytest
-from docutils import nodes
 
 import qiime2
 import qiime2.sdk.usage as usage
-from q2cli.core.usage import CLIUsage
-from q2doc.usage.usage import get_new_records, records_to_nodes
-from q2doc.usage.meta_usage import MetaUsage
-from qiime2.plugins import ArtifactAPIUsage
+from qiime2.sdk import PluginManager
+
+from q2_mystery_stew.plugin_setup import create_plugin
 
 DATA = pathlib.Path(__file__).parent / "roots" / "test-q2doc" / "data"
 
 
-@pytest.fixture(params=MetaUsage.__members__.values())
-def usage_drivers(request):
-    use = request.param.value
-    yield use
-
-
-@pytest.fixture
-def drivers_with_initialized_data(usage_drivers):
-    use = usage_drivers
-    init_data(use)
-    yield use
-
-
-def data_factory():
-    return qiime2.Artifact.import_data(
-        'MultiplexedSingleEndBarcodeInSequence',
-        DATA / 'forward.fastq.gz')
-
-
-def metadata_factory():
-    return qiime2.Metadata.load(DATA / 'metadata.tsv')
-
-
-def init_data(use):
-    data = use.init_data('data', data_factory)
-    metadata = use.init_metadata('metadata', metadata_factory)
-    use.init_data('data', data_factory)
-    use.init_metadata('metadata', metadata_factory)
-    return use, data, metadata
-
-
-def cutadapt_example(use, data, metadata):
-    barcodes_col = use.get_metadata_column('barcodes', metadata)
-    use.action(
-        usage.UsageAction(
-            plugin_id='cutadapt',
-            action_id='demux_single',
-        ),
-        usage.UsageInputs(
-            seqs=data,
-            error_rate=0,
-            barcodes=barcodes_col,
-        ),
-        usage.UsageOutputNames(
-            per_sample_sequences='demultiplexed_seqs',
-            untrimmed_sequences='untrimmed',
-        )
-    )
-
-
-def test_records_to_nodes_no_records(usage_drivers):
-    use = usage_drivers
-    result = records_to_nodes(use, {}, )
-    assert not result
-
-
-def test_records_to_nodes_execution_usage():
-    use = usage.ExecutionUsage()
-    use, data, metadata = init_data(use)
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, )
-
-    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
-    assert all(itertools.starmap(isinstance, exp_nodes))
-    assert len(result) == 4
-
-    cutadapt_example(use, data, metadata)
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, )
-
-
-def test_records_to_nodes_cli_usage():
-    use = CLIUsage()
-    use, data, metadata = init_data(use)
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, )
-
-    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
-    assert all(itertools.starmap(isinstance, exp_nodes))
-    assert len(result) == 0
-
-    cutadapt_example(use, data, metadata)
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, )
-
-
-def test_records_to_nodes_artifact_api_usage():
-    use = ArtifactAPIUsage()
-    use, data, metadata = init_data(use)
-
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, )
-
-    exp_nodes = itertools.zip_longest(result, [], fillvalue=nodes.Node)
-    assert all(itertools.starmap(isinstance, exp_nodes))
-    assert len(result) == 0
-    cutadapt_example(use, data, metadata)
-
-    records = get_new_records(use, [])
-    result = records_to_nodes(use, records, )
-
-
-def test_get_new_records(drivers_with_initialized_data):
-    use = drivers_with_initialized_data
-    result = get_new_records(use, [])
-    exp = itertools.zip_longest(result, [], fillvalue=usage.ScopeRecord)
-    assert len(result) == 2
-    assert all(itertools.starmap(isinstance, exp))
-    seen = [i.ref for i in result]
-    result = get_new_records(use, processed_records=seen)
-    assert result == tuple()
-
-
-@pytest.mark.sphinx(buildername='dirhtml', testroot="cutadapt", freshenv=True)
+@pytest.mark.sphinx(buildername='html', testroot="cutadapt", freshenv=True)
 def test_cutadapt_html(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
-    build_result = app.outdir / 'cutadapt' / 'index.html'
+    build_result = app.outdir / 'index.html'
     file_regression.check(build_result.read_text(), extension=".html")
 
 
 @pytest.mark.sphinx(buildername='singlehtml', testroot="examples", freshenv=True)
-def test_examples_html(app, file_regression):
+def test_examples_html(app, file_regression, monkeypatch):
+    monkeypatch.setenv('QIIMETEST', '1')
     app.build()
     assert app.statuscode == 0
     build_result = app.outdir / 'index.html'
     file_regression.check(build_result.read_text(), extension=".html")
 
 
-@pytest.mark.sphinx(buildername='singlehtml', testroot="mystery-stew", freshenv=True)
-def test_mystery_stew(app, file_regression):
-    from q2_mystery_stew.plugin_setup import create_plugin
-    from qiime2.sdk import PluginManager
+@pytest.mark.sphinx(buildername='html', testroot="q2doc", freshenv=True)
+def test_command_block_html(app):
+    app.build()
+    assert app.statuscode == 0
+    assert 'q2doc.command_block' in app.extensions
 
+
+def mystery_stew_examples():
     plugin = create_plugin()
     pm = PluginManager(add_plugins=False)
     pm.add_plugin(plugin)
-
-    app.build()
-    assert app.statuscode == 0
-    build_result = app.outdir / 'index.html'
-    file_regression.check(build_result.read_text(), extension=".html")
+    for action in list(plugin.actions.values()):
+        for example_name in action.examples:
+            yield action, example_name
 
 
-def test_mystery_stew_examples(mystery_stew, file_regression):
-    app = mystery_stew
+def mystery_stew_rst(app, action, example_name):
+    import pprint
+    import textwrap
+    from qiime2.sdk.usage import DiagnosticUsage
+
+    indentation = ' ' * 3
+    use = DiagnosticUsage()
+    action.examples[f'{example_name}'](use)
+    get_action = f"action = plugin.actions['{action.id}']"
+    title = f"{action.id}__{example_name}"
+    path = pathlib.Path(app.srcdir / 'index.rst')
+
+    meta = []
+    # TODO Use jinja template?
+    for name, record in use._get_records().items():
+        meta.append(f'name: {name}\n')
+        meta.append(f'record::\n')
+        result = pprint.pformat(record.result).replace("\n", "\n    ")
+        meta.append(f'    {result}\n\n')
+
+    meta = '\n'.join(meta)
+    with open(path, "w") as f:
+        setup = (
+            "from qiime2.sdk import PluginManager",
+            "pm = PluginManager()",
+            "plugin = pm.get_plugin(id='mystery_stew')",
+        )
+        example = f"example = action.examples['{example_name}']"
+        call = "example(use)"
+        lines = textwrap.indent('\n'.join([*setup, get_action, example, call]), indentation)
+        title = f"{title}\n{'-' * len(title)}\n"
+        directive = ".. usage::\n"
+        f.write('\n'.join([title, meta, directive, lines]))
+
+
+@pytest.mark.parametrize('action,example_name', mystery_stew_examples())
+@pytest.mark.sphinx(buildername='singlehtml', testroot='mystery-stew')
+def test_mystery_stew_examples(action, example_name, make_app, app_params, file_regression):
+    args, kwargs = app_params
+    app = make_app(*args, freshenv=True, **kwargs)
+    mystery_stew_rst(app, action, example_name)
     app.build()
     assert app.statuscode == 0
     build_result = app.outdir / 'index.html'

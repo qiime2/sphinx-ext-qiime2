@@ -29,7 +29,7 @@ import qiime2
 root = pathlib.Path(__file__).parent.absolute()
 sys.path.insert(0, str(root))
 
-master_doc = "cutadapt"
+master_doc = "index"
 extensions = [
     'q2doc.question',
     'q2doc.qiime1',

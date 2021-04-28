@@ -22,7 +22,6 @@ from q2doc.usage.nodes import (
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import ScopeRecord
 
-from .meta_usage import MetaUsage
 from .utils import get_docname
 from .validation import BlockValidator
 
@@ -32,8 +31,9 @@ logger = logging.getLogger(__name__)
 def process_usage_blocks(app, doctree, _):
     env = app.builder.env
     os.chdir(env.srcdir)
-    for use in MetaUsage:
-        use = use.value
+    for k, driver in env.drivers.items():
+        use = driver()
+        env.drivers[k] = use
         processed_records = []
         for block in env.usage_blocks:
             tree = ast.parse(block['code'])
@@ -57,7 +57,7 @@ def update_nodes(doctree, env):
     for node in doctree.traverse(FactoryNode):
         ref = node.ref
         try:
-            result = MetaUsage.execution.value._get_record(ref).result
+            result = env.drivers['exc_use']._get_record(ref).result
             if isinstance(result, qiime2.metadata.metadata.Metadata):
                 metadata_preview = str(result.to_dataframe())
                 node.preview = metadata_preview
@@ -128,7 +128,7 @@ def execution(use, records, block, env):
     if not out_dir.exists():
         out_dir.mkdir(parents=True)
     if block["nodes"][0].factory:
-        # TODO When factories that rely on an object that is imported  somewhere
+        # TODO When factories that rely on an object that is imported somewhere
         #  in a usage black are called, they fail.  Current workaround can be
         #  in examples.rst is to import requirements in the factory body.
         factories_to_nodes(block, env)
@@ -158,27 +158,28 @@ def artifact_api(use, records, block, env):
     for record in records:
         source = record.source
         if source == "init_data":
-            data_node = init_data_node(record)
+            data_node = init_data_node(record, env)
             block['nodes'].append(data_node)
         elif source == "init_metadata":
-            metadata_node = init_data_node(record)
+            metadata_node = init_data_node(record, env)
             block['nodes'].append(metadata_node)
         elif source == "action":
             node = block["nodes"][0]
             setup_code = get_data_nodes(env)
             rendered = use.render()
             example = remove_rendered(rendered, env.rendered['art_api'])
+            example = setup_code + example
             env.rendered['art_api'] = rendered
-            node.artifact_api = setup_code + example
+            node.artifact_api = example
             # Break after seeing the first record created by use.action() since
             # we only need to call use.render() once.
             break
 
 
-def init_data_node(record):
+def init_data_node(record, env):
     name = record.ref
     fname = f"{name}.qza"
-    result = MetaUsage.execution.value._get_record(name).result
+    result = env.drivers['exc_use']._get_record(name).result
     type_ = "Artifact" if isinstance(result, qiime2.Artifact) else "Metadata"
     load_statement = f"{name} = {type_}.load('{fname}')"
     node = UsageDataNode(load_statement, name=name)

@@ -4,12 +4,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
-    <title>QIIME 2 2021.4.0.dev2+3.g386e831 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QIIME 2 2021.4.0+2.g6930d5d documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -33,9 +32,9 @@
           <div class="body" role="main">
             
   <div class="toctree-wrapper compound">
-<span id="document-examples"></span><section id="factories">
+<span id="document-examples"></span><div class="section" id="factories">
 <h1>Factories<a class="headerlink" href="#factories" title="Permalink to this headline">¶</a></h1>
-<section id="ints">
+<div class="section" id="ints">
 <h2>Ints<a class="headerlink" href="#ints" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
@@ -112,8 +111,8 @@ $ wget <a href="http://localhost:8000/examples/results/int2.qza">"http://localho
           
       </div>
   </div>
-</div></section>
-<section id="mapping">
+</div></div>
+<div class="section" id="mapping">
 <h2>Mapping<a class="headerlink" href="#mapping" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
@@ -130,8 +129,8 @@ $ wget <a href="http://localhost:8000/examples/results/mapping1_factory.qza">"ht
           
       </div>
   </div>
-</div></section>
-<section id="metadata">
+</div></div>
+<div class="section" id="metadata">
 <h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
@@ -163,9 +162,9 @@ $ wget <a href="http://localhost:8000/examples/results/md2_factory.qza">"http://
           
       </div>
   </div>
-</div></section>
-</section>
-<section id="basic-usage">
+</div></div>
+</div>
+<div class="section" id="basic-usage">
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -234,8 +233,8 @@ ints_d, = concatenate_ints(
             </div>
         </div>
     </div>
-</div></section>
-<section id="chained-usage">
+</div></div>
+<div class="section" id="chained-usage">
 <h1>Chained Usage<a class="headerlink" href="#chained-usage" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -316,8 +315,8 @@ concatenated_ints, = concatenate_ints(
             </div>
         </div>
     </div>
-</div></section>
-<section id="simple-pipeline">
+</div></div>
+<div class="section" id="simple-pipeline">
 <h1>Simple Pipeline<a class="headerlink" href="#simple-pipeline" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -379,8 +378,8 @@ out_map, left, right, left_viz, right_viz = typical_pipeline(
             </div>
         </div>
     </div>
-</div></section>
-<section id="complex-pipeline">
+</div></div>
+<div class="section" id="complex-pipeline">
 <h1>Complex Pipeline<a class="headerlink" href="#complex-pipeline" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -456,8 +455,8 @@ out_map2, left2, right2, left_viz2, right_viz2 = typical_pipeline(
             </div>
         </div>
     </div>
-</div></section>
-<section id="identity-with-metadata-simple">
+</div></div>
+<div class="section" id="identity-with-metadata-simple">
 <h1>Identity with Metadata Simple<a class="headerlink" href="#identity-with-metadata-simple" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -512,8 +511,8 @@ out, = identity_with_metadata(
             </div>
         </div>
     </div>
-</div></section>
-<section id="identity-with-metadata-merging">
+</div></div>
+<div class="section" id="identity-with-metadata-merging">
 <h1>Identity with Metadata Merging<a class="headerlink" href="#identity-with-metadata-merging" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -570,8 +569,8 @@ out2, = identity_with_metadata(
             </div>
         </div>
     </div>
-</div></section>
-<section id="identity-with-metadata-column-get-mdc">
+</div></div>
+<div class="section" id="identity-with-metadata-column-get-mdc">
 <h1>Identity With Metadata Column Get MDC<a class="headerlink" href="#identity-with-metadata-column-get-mdc" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -629,8 +628,8 @@ out3, = identity_with_metadata_column(
             </div>
         </div>
     </div>
-</div></section>
-<section id="variadic-input-simple">
+</div></div>
+<div class="section" id="variadic-input-simple">
 <h1>Variadic Input Simple<a class="headerlink" href="#variadic-input-simple" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -692,8 +691,8 @@ out4, = variadic_input_method(
             </div>
         </div>
     </div>
-</div></section>
-<section id="optional-inputs">
+</div></div>
+<div class="section" id="optional-inputs">
 <h1>Optional Inputs<a class="headerlink" href="#optional-inputs" title="Permalink to this headline">¶</a></h1>
 <div class="tabbed panel panel-default">
     <div class="panel-heading white-bg">
@@ -774,8 +773,8 @@ ints_b, = optional_artifacts_method(
 
 output7, = optional_artifacts_method(
     ints=ints_a,
-    num1=3,
     optional1=ints_b,
+    num1=3,
     num2=4,
 )</pre>
                 </div>
@@ -786,7 +785,7 @@ output7, = optional_artifacts_method(
             </div>
         </div>
     </div>
-</div></section>
+</div></div>
 </div>
 
 
@@ -818,7 +817,7 @@ output7, = optional_artifacts_method(
       &copy;2016-2020, QIIME 2 development team.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
