@@ -107,17 +107,16 @@ def diagnostic(use, records, block, env):
 def execution(use, records, block, env):
     """Creates download nodes and saves factory results."""
     node = block["nodes"][0]
-    root, doc_name = get_docname(node)
-    out_dir = Path(env.app.outdir) / doc_name / 'results'
-    if not out_dir.exists():
-        out_dir.mkdir(parents=True)
-    if block["nodes"][0].factory:
+    if node.factory:
         # TODO When factories that rely on an object that is imported somewhere
         #  in a usage black are called, they fail.  Current workaround can be
         #  in examples.rst is to import requirements in the factory body.
         factories_to_nodes(block, env)
     for record in records:
         artifact = record.result
+        out_dir = Path(env.app.outdir) / node.docname / 'results'
+        if not out_dir.exists():
+            out_dir.mkdir(parents=True)
         path = os.path.join(out_dir, f'{record.ref}.qza')
         if record.source in ["init_metadata", "init_data"]:
             artifact.save(path)
