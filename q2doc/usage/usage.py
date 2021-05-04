@@ -43,7 +43,7 @@ def process_usage_blocks(app, doctree, _):
             exec(source)
             new_records = get_new_records(use, processed_records)
             records_to_nodes(use, new_records, block, env)
-            update_processed_records(new_records, processed_records)
+            processed_records.extend(new_records)
     update_nodes(doctree, env)
 
 
@@ -68,27 +68,10 @@ def update_nodes(doctree, env):
             )
 
 
-def get_new_records(use, processed_records) -> Union[Tuple[ScopeRecord], None]:
-    new_records = tuple()
-    records = use._get_records()
-    # TODO This won't account for new records that overwrite a previously used
-    #  var name
-    # TODO If the output name of a record produced by an action is the same as
-    #  a previously used name, it will get skipped.
-    new_record_keys = [k for k in records.keys() if k not in processed_records]
-    if new_record_keys:
-        new_records = operator.itemgetter(*new_record_keys)(records)
-        new_records = (
-            (new_records,)
-            if not isinstance(new_records, tuple)
-            else new_records
-        )
-    return new_records
-
-
-def update_processed_records(new_records, processed_records):
-    refs = [i.ref for i in new_records]
-    processed_records.extend(refs)
+def get_new_records(use, processed_records):
+    records = use._get_records().values()
+    new_records = [r for r in records if r not in processed_records]
+    return new_records or []
 
 
 def factories_to_nodes(block, env):
