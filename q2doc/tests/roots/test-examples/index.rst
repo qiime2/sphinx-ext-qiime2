@@ -122,13 +122,12 @@ Simple Pipeline
 ================
 
 .. usage::
-   ints = use.init_data('ints', ints1_factory)
    mapper = use.init_data('mapper', mapping1_factory)
 
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
                        action_id='typical_pipeline'),
-       use.UsageInputs(int_sequence=ints, mapping=mapper,
+       use.UsageInputs(int_sequence=ints_a, mapping=mapper,
                        do_extra_thing=True),
        use.UsageOutputNames(out_map='out_map', left='left', right='right',
                             left_viz='left_viz', right_viz='right_viz')
@@ -140,12 +139,10 @@ Complex Pipeline
 
 .. usage::
 
-   ints1 = use.init_data('ints1', ints1_factory)
-
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
                        action_id='typical_pipeline'),
-       use.UsageInputs(int_sequence=ints1, mapping=mapper,
+       use.UsageInputs(int_sequence=ints_a, mapping=mapper,
                        do_extra_thing=True),
        use.UsageOutputNames(out_map='out_map1', left='left1', right='right1',
                             left_viz='left_viz1', right_viz='right_viz1')
@@ -181,7 +178,7 @@ Identity with Metadata Simple
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
                        action_id='identity_with_metadata'),
-       use.UsageInputs(ints=ints, metadata=md1),
+       use.UsageInputs(ints=ints_a, metadata=md1),
        use.UsageOutputNames(out='out'),
    )
 
@@ -197,7 +194,7 @@ Identity with Metadata Merging
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
                        action_id='identity_with_metadata'),
-       use.UsageInputs(ints=ints, metadata=md3),
+       use.UsageInputs(ints=ints_a, metadata=md3),
        use.UsageOutputNames(out='out2'),
    )
 
@@ -212,7 +209,7 @@ Identity With Metadata Column Get MDC
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
                        action_id='identity_with_metadata_column'),
-       use.UsageInputs(ints=ints, metadata=mdc),
+       use.UsageInputs(ints=ints_a, metadata=mdc),
        use.UsageOutputNames(out='out3'),
    )
 

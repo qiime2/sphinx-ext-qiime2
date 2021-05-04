@@ -1,18 +1,12 @@
 import pathlib
-
 import pytest
 
-import qiime2
-import qiime2.sdk.usage as usage
 from qiime2.sdk import PluginManager
-
 from q2_mystery_stew.plugin_setup import create_plugin
-
-DATA = pathlib.Path(__file__).parent / "roots" / "test-q2doc" / "data"
 
 
 @pytest.mark.sphinx(buildername='html', testroot="cutadapt", freshenv=True)
-def test_cutadapt_html(app, file_regression):
+def test_cutadapt_example(app, file_regression):
     app.build()
     assert app.statuscode == 0
     assert 'q2doc.usage' in app.extensions
@@ -20,27 +14,11 @@ def test_cutadapt_html(app, file_regression):
     file_regression.check(build_result.read_text(), extension=".html")
 
 
-@pytest.mark.sphinx(buildername='singlehtml', testroot="examples", freshenv=True)
-def test_examples_html(app, file_regression, monkeypatch):
-    monkeypatch.setenv('QIIMETEST', '1')
-    app.build()
-    assert app.statuscode == 0
-    build_result = app.outdir / 'index.html'
-    file_regression.check(build_result.read_text(), extension=".html")
-
-
-@pytest.mark.sphinx(buildername='html', testroot="q2doc", freshenv=True)
-def test_command_block_html(app):
-    app.build()
-    assert app.statuscode == 0
-    assert 'q2doc.command_block' in app.extensions
-
-
 def mystery_stew_examples():
     plugin = create_plugin()
     pm = PluginManager(add_plugins=False)
     pm.add_plugin(plugin)
-    for action in list(plugin.actions.values()):
+    for action in plugin.actions.values():
         for example_name in action.examples:
             yield action, example_name
 
@@ -65,7 +43,7 @@ def mystery_stew_rst(app, action, example_name):
         result = pprint.pformat(record.result).replace("\n", "\n    ")
         meta.append(f'    {result}\n\n')
 
-    meta = '\n'.join(meta)
+    meta = '\n'.join(sorted(meta))
     with open(path, "w") as f:
         setup = (
             "from qiime2.sdk import PluginManager",
@@ -80,7 +58,13 @@ def mystery_stew_rst(app, action, example_name):
         f.write('\n'.join([title, meta, directive, lines]))
 
 
-@pytest.mark.parametrize('action,example_name', mystery_stew_examples())
+def _labeler(val):
+    if hasattr(val, 'id'):
+        return val.id
+    return val
+
+
+@pytest.mark.parametrize('action,example_name', mystery_stew_examples(), ids=_labeler)
 @pytest.mark.sphinx(buildername='singlehtml', testroot='mystery-stew')
 def test_mystery_stew_examples(action, example_name, make_app, app_params, file_regression):
     args, kwargs = app_params
