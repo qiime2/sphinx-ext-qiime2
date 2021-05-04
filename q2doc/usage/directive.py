@@ -32,5 +32,6 @@ class UsageDirective(SphinxDirective):
         factory = True if self.options.get('factory') else False
         name = self.options.get('name')
         node = UsageNode(factory=factory, name=name)
+        node.docname = env.docname
         env.usage_blocks.append({"code": code, "nodes": [node]})
         return [node]
