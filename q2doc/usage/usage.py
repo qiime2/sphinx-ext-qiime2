@@ -32,7 +32,8 @@ def process_usage_blocks(app, doctree, _):
     env = app.builder.env
     os.chdir(env.srcdir)
     for k, driver in env.drivers.items():
-        use = driver()
+        # ensure a new instance for each doc
+        use = driver() if isinstance(driver, type) else driver.__class__()
         env.drivers[k] = use
         processed_records = []
         for block in env.usage_blocks:
