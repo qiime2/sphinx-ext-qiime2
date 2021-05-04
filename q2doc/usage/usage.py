@@ -177,7 +177,7 @@ def get_data_nodes(env):
             if isinstance(node, UsageDataNode) and not node.loaded:
                 setup_code.append(node.setup)
                 node.loaded = True
-    return '\n'.join(setup_code) + '\n\n'
+    return '\n'.join(sorted(setup_code)) + '\n\n'
 
 
 def remove_rendered(example, rendered):
