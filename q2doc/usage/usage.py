@@ -1,10 +1,8 @@
 import ast
 import functools
-import operator
 import os
 import re
 from pathlib import Path
-from typing import Tuple, Union
 
 from sphinx.util import logging
 
@@ -20,7 +18,6 @@ from q2doc.usage.nodes import (
     FactoryNode,
 )
 from qiime2.plugins import ArtifactAPIUsage
-from qiime2.sdk.usage import ScopeRecord
 
 from .utils import get_docname
 from .validation import BlockValidator
