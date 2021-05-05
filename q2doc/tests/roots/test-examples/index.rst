@@ -29,7 +29,7 @@ Ints
        return Artifact.import_data(IntSequence2, [6, 7, 8])
 
 .. usage::
-   :factory: metadata
+   :factory: data
    :name: single_int1
 
    def single_int1_factory():

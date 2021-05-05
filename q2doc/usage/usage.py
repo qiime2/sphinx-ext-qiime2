@@ -19,7 +19,7 @@ from q2doc.usage.nodes import (
 )
 from qiime2.plugins import ArtifactAPIUsage
 
-from .utils import get_docname
+from .utils import get_docname, get_ext
 from .validation import BlockValidator
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,8 @@ def factories_to_nodes(block, env):
     node = block["nodes"].pop()
     root, doc_name = get_docname(node)
     base = env.config.base_url.rstrip('/')
-    name = f'{node.name}.qza'
+    ext = get_ext(node.factory)
+    name = f'{node.name}.{ext}'
     # These files won't actually exist until their respective init data blocks
     # are evaluated by ExecutionUsage.
     relative_url = f'results/{name}'
@@ -110,13 +111,15 @@ def execution(use, records, block, env):
         #  in examples.rst is to import requirements in the factory body.
         factories_to_nodes(block, env)
     for record in records:
+        if not record.source in ["init_metadata", "init_data"]:
+            continue
+        ext = get_ext(record.source)
         artifact = record.result
         out_dir = Path(env.app.outdir) / node.docname / 'results'
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
-        path = os.path.join(out_dir, f'{record.ref}.qza')
-        if record.source in ["init_metadata", "init_data"]:
-            artifact.save(path)
+        fp = out_dir / f'{record.ref}.{ext}'
+        artifact.save(str(fp))
 
 
 @records_to_nodes.register(CLIUsage)
@@ -158,7 +161,8 @@ def artifact_api(use, records, block, env):
 
 def init_data_node(record, env):
     name = record.ref
-    fname = f"{name}.qza"
+    ext = get_ext(record.source)
+    fname = f"{name}.{ext}"
     result = env.drivers['exc_use']._get_record(name).result
     type_ = "Artifact" if isinstance(result, qiime2.Artifact) else "Metadata"
     load_statement = f"{name} = {type_}.load('{fname}')"

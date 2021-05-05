@@ -29,7 +29,7 @@ class UsageDirective(SphinxDirective):
                 'cli_use': CLIUsage,
                 'art_use': ArtifactAPIUsage,
             }
-        factory = True if self.options.get('factory') else False
+        factory = self.options.get('factory')
         name = self.options.get('name')
         node = UsageNode(factory=factory, name=name)
         node.docname = env.docname

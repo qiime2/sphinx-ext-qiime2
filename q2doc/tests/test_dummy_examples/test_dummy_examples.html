@@ -133,19 +133,19 @@ $ wget <a href="http://localhost:8000/index/results/mapper.qza">"http://localhos
 <h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
 <div class="panel panel-default">
   <div class="panel-heading white-bg">
-      Use the command below or click the link to download md1.qza.
+      Use the command below or click the link to download md1.tsv.
   </div>
 
   <div class="panel-body">
       <div class="highlight-shell">
           <div class="highlight">
               <pre>
-$ wget <a href="http://localhost:8000/index/results/md1.qza">"http://localhost:8000/index/results/md1.qza"</a>
+$ wget <a href="http://localhost:8000/index/results/md1.tsv">"http://localhost:8000/index/results/md1.tsv"</a>
               </pre>
           </div>
           
           <div class="panel-heading white-bg">
-              <strong>Metadata Preview | md1.qza</strong>
+              <strong>Metadata Preview | md1.tsv</strong>
           </div>
           <div class="highlight">
               <pre>    a
@@ -159,19 +159,19 @@ id
   </div>
 </div><div class="panel panel-default">
   <div class="panel-heading white-bg">
-      Use the command below or click the link to download md2.qza.
+      Use the command below or click the link to download md2.tsv.
   </div>
 
   <div class="panel-body">
       <div class="highlight-shell">
           <div class="highlight">
               <pre>
-$ wget <a href="http://localhost:8000/index/results/md2.qza">"http://localhost:8000/index/results/md2.qza"</a>
+$ wget <a href="http://localhost:8000/index/results/md2.tsv">"http://localhost:8000/index/results/md2.tsv"</a>
               </pre>
           </div>
           
           <div class="panel-heading white-bg">
-              <strong>Metadata Preview | md2.qza</strong>
+              <strong>Metadata Preview | md2.tsv</strong>
           </div>
           <div class="highlight">
               <pre>    b
@@ -504,7 +504,7 @@ out_map2, left2, right2, left_viz2, right_viz2 = typical_pipeline(
                 <div class="highlight">
                     <pre>$ qiime dummy-plugin identity-with-metadata \
     --i-ints ints_a.qza \
-    --m-metadata-file md1.qza \
+    --m-metadata-file md1.tsv \
     --o-out out.qza</pre>
                 </div>
                 </p>
@@ -514,7 +514,7 @@ out_map2, left2, right2, left_viz2, right_viz2 = typical_pipeline(
                     <strong>Artifact API</strong>
 
                 <div class="highlight">
-                    <pre>md1 = Metadata.load('md1.qza')
+                    <pre>md1 = Metadata.load('md1.tsv')
 
 from qiime2.plugins.dummy_plugin.methods import identity_with_metadata
 
@@ -560,8 +560,8 @@ out, = identity_with_metadata(
                 <div class="highlight">
                     <pre>$ qiime dummy-plugin identity-with-metadata \
     --i-ints ints_a.qza \
-    --m-metadata-file md1.qza \
-    --m-metadata-file md2.qza \
+    --m-metadata-file md1.tsv \
+    --m-metadata-file md2.tsv \
     --o-out out2.qza</pre>
                 </div>
                 </p>
@@ -571,7 +571,7 @@ out, = identity_with_metadata(
                     <strong>Artifact API</strong>
 
                 <div class="highlight">
-                    <pre>md2 = Metadata.load('md2.qza')
+                    <pre>md2 = Metadata.load('md2.tsv')
 
 md3 = md1.merge(md2)
 
@@ -617,7 +617,7 @@ out2, = identity_with_metadata(
                 <div class="highlight">
                     <pre>$ qiime dummy-plugin identity-with-metadata-column \
     --i-ints ints_a.qza \
-    --m-metadata-file md1.qza \
+    --m-metadata-file md1.tsv \
     --m-metadata-column 'a' \
     --o-out out3.qza</pre>
                 </div>
