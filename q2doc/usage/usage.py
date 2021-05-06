@@ -28,10 +28,11 @@ logger = logging.getLogger(__name__)
 def process_usage_blocks(app, doctree, _):
     env = app.builder.env
     os.chdir(env.srcdir)
-    for k, driver in env.drivers.items():
+    drivers = env.domaindata['q2']['drivers']
+    for k, driver in drivers.items():
         # ensure a new instance for each doc
         use = driver() if isinstance(driver, type) else driver.__class__()
-        env.drivers[k] = use
+        drivers[k] = use
         processed_records = []
         for block in env.usage_blocks:
             tree = ast.parse(block['code'])
@@ -55,7 +56,7 @@ def update_nodes(doctree, env):
     for node in doctree.traverse(FactoryNode):
         ref = node.ref
         try:
-            result = env.drivers['exc_use']._get_record(ref).result
+            result = env.domaindata['q2']['drivers']['exc_use']._get_record(ref).result
             if isinstance(result, qiime2.metadata.metadata.Metadata):
                 metadata_preview = str(result.to_dataframe())
                 node.preview = metadata_preview
@@ -163,7 +164,7 @@ def init_data_node(record, env):
     name = record.ref
     ext = get_ext(record.source)
     fname = f"{name}.{ext}"
-    result = env.drivers['exc_use']._get_record(name).result
+    result = env.domaindata['q2']['drivers']['exc_use']._get_record(name).result
     type_ = "Artifact" if isinstance(result, qiime2.Artifact) else "Metadata"
     load_statement = f"{name} = {type_}.load('{fname}')"
     node = UsageDataNode(load_statement, name=name)

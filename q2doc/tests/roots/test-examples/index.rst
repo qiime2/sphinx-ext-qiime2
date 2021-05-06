@@ -4,7 +4,7 @@ Factories
 Ints
 ----
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: ints_a
 
@@ -12,7 +12,7 @@ Ints
        from qiime2.core.testing.type import IntSequence1
        return Artifact.import_data(IntSequence1, [0, 1, 2])
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: ints_b
 
@@ -20,7 +20,7 @@ Ints
        from qiime2.core.testing.type import IntSequence1
        return Artifact.import_data(IntSequence1, [3, 4, 5])
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: ints_c
 
@@ -28,7 +28,7 @@ Ints
        from qiime2.core.testing.type import IntSequence2
        return Artifact.import_data(IntSequence2, [6, 7, 8])
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: single_int1
 
@@ -36,7 +36,7 @@ Ints
        from qiime2.core.testing.type import SingleInt
        return Artifact.import_data(SingleInt, 10)
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: single_int2
 
@@ -47,7 +47,7 @@ Ints
 Mapping
 --------
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: mapper
 
@@ -58,7 +58,7 @@ Mapping
 Metadata
 ---------
 
-.. usage::
+.. q2:usage::
    :factory: metadata
    :name: md1
 
@@ -67,7 +67,7 @@ Metadata
                                    index=pd.Index(['0', '1', '2'],
                                                    name='id')))
 
-.. usage::
+.. q2:usage::
    :factory: metadata
    :name: md2
 
@@ -80,7 +80,7 @@ Metadata
 Basic Usage
 ===========
 
-.. usage::
+.. q2:usage::
    ints_a = use.init_data('ints_a', ints1_factory)
    ints_b = use.init_data('ints_b', ints2_factory)
    ints_c = use.init_data('ints_c', ints3_factory)
@@ -96,7 +96,7 @@ Basic Usage
 
 Chained Usage
 ===============
-.. usage::
+.. q2:usage::
 
    use.comment('This example demonstrates chained usage (pt 1).')
    use.action(
@@ -121,7 +121,7 @@ Chained Usage
 Simple Pipeline
 ================
 
-.. usage::
+.. q2:usage::
    mapper = use.init_data('mapper', mapping1_factory)
 
    use.action(
@@ -137,7 +137,7 @@ Simple Pipeline
 Complex Pipeline
 ================
 
-.. usage::
+.. q2:usage::
 
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
@@ -171,7 +171,7 @@ Complex Pipeline
 Identity with Metadata Simple
 =============================
 
-.. usage::
+.. q2:usage::
 
    md1 = use.init_metadata('md1', md1_factory)
 
@@ -186,7 +186,7 @@ Identity with Metadata Simple
 Identity with Metadata Merging
 ==============================
 
-.. usage::
+.. q2:usage::
 
    md2 = use.init_metadata('md2', md2_factory)
    md3 = use.merge_metadata('md3', md1, md2)
@@ -202,7 +202,7 @@ Identity with Metadata Merging
 Identity With Metadata Column Get MDC
 =====================================
 
-.. usage::
+.. q2:usage::
 
    mdc = use.get_metadata_column('a', md1)
 
@@ -217,7 +217,7 @@ Identity With Metadata Column Get MDC
 Variadic Input Simple
 =====================
 
-.. usage::
+.. q2:usage::
 
    int_collection = use.init_data_collection('int_collection', list, ints_a, ints_b)
 
@@ -238,7 +238,7 @@ Variadic Input Simple
 Optional Inputs
 ===============
 
-.. usage::
+.. q2:usage::
 
    use.action(
        use.UsageAction(plugin_id='dummy_plugin',
