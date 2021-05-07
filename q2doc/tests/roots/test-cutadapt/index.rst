@@ -12,7 +12,7 @@ Download and import data used in this tutorial
 First, we declare data needed by the usage example that follows. This will render download elements.  At this point,
 we don't mention anything driver-specific - just get the data.
 
-.. usage::
+.. q2:usage::
    :factory: data
    :name: multiplexed_sequences
 
@@ -20,7 +20,7 @@ we don't mention anything driver-specific - just get the data.
        return qiime2.Artifact.import_data('MultiplexedSingleEndBarcodeInSequence', 'data/forward.fastq.gz')
 
 
-.. usage::
+.. q2:usage::
    :factory: metadata
    :name: metadata
 
@@ -31,7 +31,7 @@ we don't mention anything driver-specific - just get the data.
 The data here consists of single-end reads (6 reads total). There are two
 samples present in the data, with the following barcodes on the 5' end:
 
-.. usage::
+.. q2:usage::
     data = use.init_data('multiplexed_sequences', data_factory)
     metadata = use.init_metadata('metadata', metadata_factory)
 
@@ -41,7 +41,7 @@ Demultiplex the reads
 
 Now that we have everything imported, let's do the thing:
 
-.. usage::
+.. q2:usage::
   barcodes_col = use.get_metadata_column('barcodes', metadata)
 
   use.action(
