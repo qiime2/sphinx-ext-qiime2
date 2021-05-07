@@ -6,12 +6,20 @@ from q2_mystery_stew.plugin_setup import create_plugin
 
 
 def mystery_stew_examples():
+    # Taken from q2_mystery_stew.test.test_templates
     plugin = create_plugin()
     pm = PluginManager(add_plugins=False)
     pm.add_plugin(plugin)
     for action in plugin.actions.values():
         for example_name in action.examples:
             yield action, example_name
+
+
+def _labeler(val):
+    # Taken from q2_mystery_stew.test.test_templates
+    if hasattr(val, 'id'):
+        return val.id
+    return val
 
 
 def mystery_stew_rst(app, action, example_name):
@@ -37,12 +45,6 @@ def mystery_stew_rst(app, action, example_name):
         title = f"{title}\n{'-' * len(title)}\n"
         directive = ".. q2:usage::\n"
         f.write('\n'.join([title, directive, lines]))
-
-
-def _labeler(val):
-    if hasattr(val, 'id'):
-        return val.id
-    return val
 
 
 @pytest.mark.parametrize('action,example_name', mystery_stew_examples(), ids=_labeler)
