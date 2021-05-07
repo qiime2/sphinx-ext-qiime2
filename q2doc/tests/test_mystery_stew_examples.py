@@ -41,15 +41,22 @@ def mystery_stew_rst(app, action, example_name):
         )
         example = f"example = action.examples['{example_name}']"
         call = "example(use)"
-        lines = textwrap.indent('\n'.join([*setup, get_action, example, call]), indentation)
+        lines = textwrap.indent('\n'.join([*setup, get_action, example, call]),
+                                indentation)
         title = f"{title}\n{'-' * len(title)}\n"
         directive = ".. q2:usage::\n"
         f.write('\n'.join([title, directive, lines]))
 
 
-@pytest.mark.parametrize('action,example_name', mystery_stew_examples(), ids=_labeler)
+@pytest.mark.parametrize('action,example_name',
+                         mystery_stew_examples(),
+                         ids=_labeler)
 @pytest.mark.sphinx(buildername='html', testroot='mystery-stew')
-def test_mystery_stew_examples(action, example_name, make_app, app_params, file_regression):
+def test_mystery_stew_examples(action,
+                               example_name,
+                               make_app,
+                               app_params,
+                               file_regression):
     args, kwargs = app_params
     app = make_app(*args, freshenv=True, **kwargs)
     mystery_stew_rst(app, action, example_name)
