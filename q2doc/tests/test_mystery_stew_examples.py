@@ -15,7 +15,6 @@ def mystery_stew_examples():
 
 
 def mystery_stew_rst(app, action, example_name):
-    import pprint
     import textwrap
     from qiime2.sdk.usage import DiagnosticUsage
 
