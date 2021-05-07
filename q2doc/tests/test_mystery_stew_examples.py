@@ -36,7 +36,7 @@ def mystery_stew_rst(app, action, example_name):
         call = "example(use)"
         lines = textwrap.indent('\n'.join([*setup, get_action, example, call]), indentation)
         title = f"{title}\n{'-' * len(title)}\n"
-        directive = ".. usage::\n"
+        directive = ".. q2:usage::\n"
         f.write('\n'.join([title, directive, lines]))
 
 
