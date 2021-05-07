@@ -1,4 +1,3 @@
-from sphinx.application import Sphinx
 import sys
 import pathlib
 
