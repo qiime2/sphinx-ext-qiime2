@@ -1,0 +1,23 @@
+<div class="panel panel-default">
+  <div class="panel-heading white-bg">
+      Use the command below or click the link to download {{ node.saveas }}.
+  </div>
+
+  <div class="panel-body">
+      <div class="highlight-shell">
+          <div class="highlight">
+              <pre>
+$ wget <a href="{{ node.absolute_url }}">"{{ node.absolute_url }}"</a>
+              </pre>
+          </div>
+          {% if node.preview %}
+          <div class="panel-heading white-bg">
+              <strong>Metadata Preview | {{ node.saveas }}</strong>
+          </div>
+          <div class="highlight">
+              <pre>{{ node.preview }}</pre>
+          </div>
+          {% endif %}
+      </div>
+  </div>
+</div>
