@@ -112,7 +112,7 @@ def execution(use, records, block, env):
         #  in examples.rst is to import requirements in the factory body.
         factories_to_nodes(block, env)
     for record in records:
-        if not record.source in ["init_metadata", "init_data"]:
+        if record.source not in ["init_metadata", "init_data"]:
             continue
         ext = get_ext(record.source)
         artifact = record.result
