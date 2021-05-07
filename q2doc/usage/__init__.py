@@ -1,7 +1,7 @@
 from sphinx.application import Sphinx
 
 from q2doc.usage.usage import process_usage_blocks
-from q2doc.usage.directive import UsageDirective, QIIME2Domain
+from q2doc.usage.directive import QIIME2Domain
 from q2doc.usage.nodes import (
     UsageNode,
     UsageExampleNode,

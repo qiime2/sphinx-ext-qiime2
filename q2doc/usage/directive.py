@@ -2,7 +2,7 @@ from docutils.parsers.rst import directives
 from sphinx.domains import Domain
 from sphinx.util.docutils import SphinxDirective
 
-from q2doc.usage.nodes import UsageNode, UsageDataNode, UsageExampleNode, FactoryNode
+from q2doc.usage.nodes import UsageNode
 from q2cli.core.usage import CLIUsage
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk import usage as usage
