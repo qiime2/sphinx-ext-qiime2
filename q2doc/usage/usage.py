@@ -46,6 +46,7 @@ def process_usage_blocks(app, doctree, _):
 
 
 def update_nodes(doctree, env):
+    exc_use = env.domaindata['q2']['drivers']['exc_use']
     for block, node in zip(env.usage_blocks, doctree.traverse(UsageNode)):
         nodes = block["nodes"]
         node.replace_self(nodes)
@@ -56,7 +57,7 @@ def update_nodes(doctree, env):
     for node in doctree.traverse(FactoryNode):
         ref = node.ref
         try:
-            result = env.domaindata['q2']['drivers']['exc_use']._get_record(ref).result
+            result = exc_use._get_record(ref).result
             if isinstance(result, qiime2.metadata.metadata.Metadata):
                 metadata_preview = str(result.to_dataframe())
                 node.preview = metadata_preview
@@ -164,7 +165,8 @@ def init_data_node(record, env):
     name = record.ref
     ext = get_ext(record.source)
     fname = f"{name}.{ext}"
-    result = env.domaindata['q2']['drivers']['exc_use']._get_record(name).result
+    exc_use = env.domaindata['q2']['drivers']['exc_use']
+    result = exc_use._get_record(name).result
     type_ = "Artifact" if isinstance(result, qiime2.Artifact) else "Metadata"
     load_statement = f"{name} = {type_}.load('{fname}')"
     node = UsageDataNode(load_statement, name=name)

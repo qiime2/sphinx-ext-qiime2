@@ -36,15 +36,13 @@ class QIIME2Domain(Domain):
     name = 'q2'
     label = 'QIIME 2 Domain'
 
-    directives = {
-        'usage': UsageDirective
-    }
+    directives = {'usage': UsageDirective}
 
     initial_data = {
         'drivers': {
-        'dia_use': usage.DiagnosticUsage,
-        'exc_use': usage.ExecutionUsage,
-        'cli_use': CLIUsage,
-        'art_use': ArtifactAPIUsage,
+            'dia_use': usage.DiagnosticUsage,
+            'exc_use': usage.ExecutionUsage,
+            'cli_use': CLIUsage,
+            'art_use': ArtifactAPIUsage,
         },
     }
