@@ -74,6 +74,7 @@ class CommandBlockDirective(docutils.parsers.rst.Directive):
         'saveas': docutils.parsers.rst.directives.unchanged_required,
         'stdout': docutils.parsers.rst.directives.flag,
         'stderr': docutils.parsers.rst.directives.flag,
+        'allow-error': docutils.parsers.rst.directives.flag,
     }
 
     def run(self):
@@ -121,7 +122,9 @@ class CommandBlockDirective(docutils.parsers.rst.Directive):
                                        env.docname)
             os.makedirs(working_dir, exist_ok=True)
 
-            completed_processes = self._execute_commands(commands, working_dir)
+            allow_error = 'allow-error' in opts
+            completed_processes = self._execute_commands(commands, working_dir,
+                                                         allow_error)
 
             if command_mode:
                 for stream_type in ['stdout', 'stderr']:
@@ -147,7 +150,7 @@ class CommandBlockDirective(docutils.parsers.rst.Directive):
         node['language'] = 'shell'
         return node
 
-    def _execute_commands(self, commands, working_dir):
+    def _execute_commands(self, commands, working_dir, allow_error):
         comp_procs = []
         for command in commands:
             command = command.strip()
@@ -176,7 +179,7 @@ class CommandBlockDirective(docutils.parsers.rst.Directive):
                                                    "command %r: %s" %
                                                    (command, e))
 
-            if comp_proc.returncode != 0:
+            if not allow_error and comp_proc.returncode != 0:
                 msg = (
                     "Command %r exited with non-zero return code %d.\n\n"
                     "stdout:\n\n%s\n\n"
