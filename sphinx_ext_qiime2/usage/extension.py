@@ -1,43 +1,50 @@
-from io import StringIO
-from contextlib import redirect_stdout
-
 import docutils.parsers.rst.directives
-
 
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk import PluginManager
 from qiime2.sdk.usage import ExecutionUsage
+from q2cli.core.usage import CLIUsageFormatter
 
+
+def render_artifact_api(use):
+    return use.render()
+
+def render_cli(use):
+    return '\n'.join(use.lines)
+
+
+render = {
+    'artifact_api': render_artifact_api,
+    'cli': render_cli,
+}
 
 class UsageDirective(docutils.parsers.rst.Directive):
     has_content = True
 
     def run(self):
+        nodes = []
         PluginManager()
 
-        uses = ArtifactAPIUsage()
         exc = ExecutionUsage()
+        uses = {
+            'artifact_api': ArtifactAPIUsage(),
+            'cli': CLIUsageFormatter(),
+        }
 
         cmd = '\n'.join(self.content)
 
-        buf = StringIO()
-        with redirect_stdout(buf):
+        for driver_name, use in uses.items():
             exec(cmd, dict(), {'use': use})
+            rendered = render[driver_name](use)
+            rendered_usage_node = docutils.nodes.literal_block(rendered, rendered)
+            nodes.append(rendered_usage_node)
+
         exec(cmd, {'use': exc})
-
-        stdout = buf.getvalue()
-
-        rendered = use.render()
-        rendered_usage_node = docutils.nodes.literal_block(rendered, rendered)
-
         outputs = '\n'.join(exc.records.keys())
         outputs_node = docutils.nodes.literal_block(outputs, outputs)
+        nodes.append(outputs_node)
 
-        # BREAK IN CASE OF EMERGENCY
-        # cmd_node = docutils.nodes.literal_block(cmd, cmd)
-        # stdout_node = docutils.nodes.literal_block(stdout, stdout)
-        # return [cmd_node, stdout_node, rendered_usage_node]
-        return [rendered_usage_node, outputs_node]
+        return nodes
 
 
 def setup(app):
