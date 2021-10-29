@@ -9,27 +9,34 @@ from q2cli.core.usage import CLIUsageFormatter
 def render_artifact_api(use):
     rendered =  use.render()
     use.recorder = []
-    return rendered
+    return '# artifact api:\n\n%s' % rendered
 
 
 def render_cli(use):
     rendered = '\n'.join(use.lines)
     use.lines = []
-    return rendered
+    return '# q2cli:\n\n%s' % rendered
+
+
+def render_exc(use):
+    rendered = '\n'.join(use.records.keys())
+    use.records = {}
+    return 'executed:\n\n%s' % rendered
 
 
 render = {
     'artifact_api': render_artifact_api,
     'cli': render_cli,
+    'exc': render_exc,
 }
 
 
 def setup_usage_drivers(app):
     PluginManager()
-    app.exc = {'use': ExecutionUsage()}
     app.contexts = {
         'artifact_api': {'use': ArtifactAPIUsage()},
         'cli': {'use': CLIUsageFormatter()},
+        'exc': {'use': ExecutionUsage()},
     }
 
 
@@ -38,9 +45,7 @@ class UsageDirective(docutils.parsers.rst.Directive):
 
     def run(self):
         nodes = []
-        env = self.state.document.settings.env
-        contexts = env.app.contexts
-        exc = env.app.exc
+        contexts = self.state.document.settings.env.app.contexts
 
         cmd = '\n'.join(self.content)
 
@@ -49,11 +54,6 @@ class UsageDirective(docutils.parsers.rst.Directive):
             rendered = render[driver_name](ctx['use'])
             rendered_usage_node = docutils.nodes.literal_block(rendered, rendered)
             nodes.append(rendered_usage_node)
-
-        exec(cmd, exc)
-        outputs = '\n'.join(exc['use'].records.keys())
-        outputs_node = docutils.nodes.literal_block(outputs, outputs)
-        nodes.append(outputs_node)
 
         return nodes
 
