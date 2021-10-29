@@ -6,15 +6,17 @@ from q2cli.core.usage import CLIUsageFormatter
 
 
 class SphinxArtifactUsage(ArtifactAPIUsage):
-    def render(self, flush=False):
+    def render(self, node_id, flush=False):
         rendered = super().render(flush)
-        return nodes.literal_block(rendered, rendered)
+        return nodes.literal_block(
+            rendered, rendered, ids=[node_id], classes=['artifact-usage'])
 
 
 class SphinxCLIUsage(CLIUsageFormatter):
-    def render(self, flush=False):
+    def render(self, node_id, flush=False):
         rendered = super().render(flush)
-        return nodes.literal_block(rendered, rendered)
+        return nodes.literal_block(
+            rendered, rendered, ids=[node_id], classes=['cli-usage'])
 
 
 class SphinxExecUsage(Usage):
@@ -31,12 +33,13 @@ class SphinxExecUsage(Usage):
         self.recorder[variable.name] = variable.value
         return variable
 
-    def render(self, flush=False):
+    def render(self, node_id, flush=False):
         recs = self.recorder
         if flush:
             self.recorder = {}
         rendered = '\n'.join('%s: %s' % (k, str(r)) for k, r in recs.items())
-        return nodes.literal_block(rendered, rendered)
+        return nodes.literal_block(
+            rendered, rendered, ids=[node_id], classes=['exec-usage'])
 
     def init_artifact(self, name, factory):
         variable = super().init_artifact(name, factory)

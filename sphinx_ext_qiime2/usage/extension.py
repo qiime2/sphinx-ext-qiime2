@@ -23,17 +23,24 @@ class UsageDirective(docutils.parsers.rst.Directive):
 
     def run(self):
         nodes = []
-        contexts = self.state.document.settings.env.app.contexts
+        env = self._get_env()
 
         cmd = '\n'.join(self.content)
 
-        for driver_name, ctx in contexts.items():
+        for driver_name, ctx in env.app.contexts.items():
             exec(cmd, ctx)
-            node = ctx['use'].render(flush=True)
+            node_id = self._new_id()
+            node = ctx['use'].render(node_id, flush=True)
             nodes.append(node)
 
         return nodes
 
+    def _get_env(self):
+        return self.state.document.settings.env
+
+    def _new_id(self):
+        env = self._get_env()
+        return 'usage-%d' % (env.new_serialno('usage'),)
 
 def setup(app):
     app.connect('builder-inited', setup_usage_drivers)
