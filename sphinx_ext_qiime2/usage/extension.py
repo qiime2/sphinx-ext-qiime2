@@ -1,4 +1,9 @@
+import os
+import pathlib
+import pkg_resources
+
 import docutils.parsers.rst.directives
+from sphinx.util.fileutil import copy_asset
 
 from qiime2.sdk import PluginManager
 
@@ -7,6 +12,19 @@ from .driver import (
     SphinxArtifactUsage,
     SphinxCLIUsage,
 )
+
+
+def copy_asset_files(app, pagename, templatename, context, doctree):
+    base_fp = pkg_resources.resource_filename('sphinx_ext_qiime2', 'usage')
+    asset_path = pathlib.Path(base_fp) / 'assets'
+
+    for path in asset_path.glob('*.js'):
+        copy_asset(str(path), os.path.join(app.outdir, '_static'))
+        app.add_js_file(str(path.name))
+
+    for path in asset_path.glob('*.css'):
+        copy_asset(str(path), os.path.join(app.outdir, '_static'))
+        app.add_css_file(path.name)
 
 
 def setup_usage_drivers(app):
@@ -44,5 +62,6 @@ class UsageDirective(docutils.parsers.rst.Directive):
 
 def setup(app):
     app.connect('builder-inited', setup_usage_drivers)
+    app.connect('html-page-context', copy_asset_files)
     app.add_directive('usage', UsageDirective)
     return {'version': '0.0.1'}

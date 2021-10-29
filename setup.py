@@ -16,6 +16,6 @@ setup(
     url='https://qiime2.org',
     include_package_data=True,
     package_data={
-        'sphinx_ext_qiime2': ['./*/templates/*']
+        'sphinx_ext_qiime2': ['./*/templates/*', './*/assets/*']
     },
 )
