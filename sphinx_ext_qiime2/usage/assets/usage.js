@@ -1,6 +1,6 @@
 KNOWN_INTERFACES = {
-  'artifact-usage': 'Artifact API',
   'cli-usage': 'q2cli',
+  'artifact-usage': 'Artifact API',
 };
 
 window.addEventListener('load', () => {

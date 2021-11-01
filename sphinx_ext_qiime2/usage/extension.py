@@ -46,9 +46,11 @@ class UsageDirective(docutils.parsers.rst.Directive):
         cmd = '\n'.join(self.content)
 
         for driver_name, ctx in env.app.contexts.items():
+            use = ctx['use']
+            use.sphinx_env = env
             exec(cmd, ctx)
             node_id = self._new_id()
-            node = ctx['use'].render(node_id, env, self.state, flush=True)
+            node = ctx['use'].render(node_id, self.state, flush=True)
             if node is not None:
                 nodes.append(node)
 
