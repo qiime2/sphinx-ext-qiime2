@@ -63,6 +63,7 @@ class UsageDirective(docutils.parsers.rst.Directive):
         env = self._get_env()
         return 'usage-%d' % (env.new_serialno('usage'),)
 
+
 def setup(app):
     app.connect('builder-inited', setup_usage_drivers)
     app.connect('html-page-context', copy_asset_files)

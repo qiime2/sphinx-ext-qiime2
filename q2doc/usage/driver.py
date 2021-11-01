@@ -23,7 +23,8 @@ def _build_url(env, fn):
 class SphinxArtifactUsage(ArtifactAPIUsage):
     def _build_request(self, var):
         # Build a tmp cli-based variable, for filename templating!
-        cli_var = CLIUsageVariable(var.name, lambda: None, var.var_type, var.use)
+        cli_var = CLIUsageVariable(var.name, lambda: None,
+                                   var.var_type, var.use)
         fn = cli_var.to_interface_name()
         url = _build_url(self.sphinx_env, fn)
 
