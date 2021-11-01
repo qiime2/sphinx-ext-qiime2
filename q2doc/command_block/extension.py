@@ -30,7 +30,7 @@ CURRENT_WORKING_DIR = '.'
 CURRENT_TUTORIAL = None
 
 
-loader = jinja2.PackageLoader('sphinx_ext_qiime2.command_block', 'templates')
+loader = jinja2.PackageLoader('q2doc.command_block', 'templates')
 jinja_env = jinja2.Environment(loader=loader)
 logger = logging.getLogger(__name__)
 
