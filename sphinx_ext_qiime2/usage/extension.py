@@ -48,8 +48,9 @@ class UsageDirective(docutils.parsers.rst.Directive):
         for driver_name, ctx in env.app.contexts.items():
             exec(cmd, ctx)
             node_id = self._new_id()
-            node = ctx['use'].render(node_id, flush=True)
-            nodes.append(node)
+            node = ctx['use'].render(node_id, env, self.state, flush=True)
+            if node is not None:
+                nodes.append(node)
 
         return nodes
 
