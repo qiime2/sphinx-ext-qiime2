@@ -10,12 +10,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='sphinx-ext-qiime2',
+    name='q2doc',
     packages=find_packages(),
     license='BSD-3-Clause',
     url='https://qiime2.org',
     include_package_data=True,
     package_data={
-        'sphinx_ext_qiime2': ['./*/templates/*', './*/assets/*']
+        'q2doc': ['./*/templates/*', './*/assets/*']
     },
 )

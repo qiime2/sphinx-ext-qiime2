@@ -15,7 +15,7 @@ from .driver import (
 
 
 def copy_asset_files(app, pagename, templatename, context, doctree):
-    base_fp = pkg_resources.resource_filename('sphinx_ext_qiime2', 'usage')
+    base_fp = pkg_resources.resource_filename('q2doc', 'usage')
     asset_path = pathlib.Path(base_fp) / 'assets'
 
     for path in asset_path.glob('*.js'):
@@ -24,7 +24,7 @@ def copy_asset_files(app, pagename, templatename, context, doctree):
 
     for path in asset_path.glob('*.css'):
         copy_asset(str(path), os.path.join(app.outdir, '_static'))
-        app.add_css_file(path.name)
+        app.add_css_file(str(path.name))
 
 
 def setup_usage_drivers(app):
