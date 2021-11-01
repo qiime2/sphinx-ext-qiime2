@@ -16,6 +16,6 @@ setup(
     url='https://qiime2.org',
     include_package_data=True,
     package_data={
-        'q2doc': ['./*/templates/*']
+        'q2doc': ['./*/templates/*', './*/assets/*']
     },
 )
