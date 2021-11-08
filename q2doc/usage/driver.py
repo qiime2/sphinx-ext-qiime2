@@ -1,79 +1,171 @@
+from contextlib import redirect_stdout, redirect_stderr
+import io
+import os
 import pathlib
+import shutil
+import tempfile
 import urllib.parse
 
-from docutils import nodes, statemachine
+from docutils import nodes
 
+from qiime2.plugin import model
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import Usage, ExecutionUsageVariable
-from q2cli.core.usage import CLIUsageFormatter, CLIUsageVariable
+from q2cli.core.usage import CLIUsage, CLIUsageVariable
+
+
+AUTO_COLLECT_SIZE = 3
 
 
 def _build_url(env, fn):
     baseurl = env.config.html_baseurl
-
     if baseurl == '':
-        raise ValueError('must set `baseurl` sphinx config val')
-
+        raise ValueError('must set `html_baseurl` sphinx config val')
     parts = list(urllib.parse.urlparse(baseurl))
-    parts[2] = 'data/%s/%s' % (env.docname, fn)
+    parts[2] += 'data/%s/%s' % (env.docname, fn)
     url = urllib.parse.urlunparse(parts)
     return url
 
 
 class SphinxArtifactUsage(ArtifactAPIUsage):
-    def _build_request(self, var):
+    def __init__(self, sphinx_env):
+        super().__init__(action_collection_size=AUTO_COLLECT_SIZE)
+        self.sphinx_env = sphinx_env
+
+    def _to_cli_var(self, var):
         # Build a tmp cli-based variable, for filename templating!
-        cli_var = CLIUsageVariable(var.name, lambda: None,
-                                   var.var_type, var.use)
+        return CLIUsageVariable(var.name, lambda: None, var.var_type, var.use)
+
+    def _download_file(self, var):
+        cli_var = self._to_cli_var(var)
         fn = cli_var.to_interface_name()
         url = _build_url(self.sphinx_env, fn)
 
-        imps = [('urllib.request', 'urlretrieve'), ('qiime2.sdk', 'Result')]
-        for imp in imps:
-            if imp not in self.global_imports:
-                self.local_imports.add(imp)
-                self.global_imports.add(imp)
+        self._update_imports(from_='urllib', import_='request')
 
-        self.recorder.append('urlretrieve(%r, %r)' % (url, fn))
-        self.recorder.append('%s = Result.load(%r)\n' % (var.name, fn))
+        lines = [
+            'url = %r' % (url,),
+            'fn = %r' % (fn,),
+            'request.urlretrieve(url, fn)',
+        ]
 
-    def init_artifact(self, name, factory):
-        var = super().init_artifact(name, factory)
-        self._build_request(var)
-        return var
+        self._add(lines)
 
-    def init_metadata(self, name, factory):
-        var = super().init_artifact(name, factory)
-        self._build_request(var)
-        return var
-
-    def render(self, node_id, state, flush=False):
-        rendered = super().render(flush)
-        return nodes.literal_block(
-            rendered, rendered, ids=[node_id], classes=['artifact-usage'])
-
-
-class SphinxCLIUsage(CLIUsageFormatter):
-    def _build_request(self, var):
-        fn = var.to_interface_name()
-        url = _build_url(self.sphinx_env, fn)
-
-        self.recorder.append('wget -O %s %s' % (fn, url))
+        return cli_var
 
     def init_artifact(self, name, factory):
         var = super().init_artifact(name, factory)
-        self._build_request(var)
+
+        self._download_file(var)
+        self._update_imports(from_='qiime2', import_='Artifact')
+        input_fp = var.to_interface_name()
+
+        lines = [
+            '%s = Artifact.load(fn)' % (input_fp,),
+            '',
+        ]
+
+        self._add(lines)
+
         return var
 
     def init_metadata(self, name, factory):
         var = super().init_metadata(name, factory)
-        self._build_request(var)
+
+        self._download_file(var)
+        self._update_imports(from_='qiime2', import_='Metadata')
+        input_fp = var.to_interface_name()
+
+        lines = [
+            '%s = Metadata.load(fn)' % (input_fp,),
+            '',
+        ]
+
+        self._add(lines)
+
         return var
 
-    def render(self, node_id, state, flush=False):
+    def init_format(self, name, factory, ext=None):
+        var = super().init_format(name, factory, ext=ext)
+
+        # no ext means a dirfmt, which means we have zipped the computed res.
+        if ext is None:
+            ext = 'zip'
+
+        fn = '%s.%s' % (name, ext)
+        tmp_var = self.usage_variable(fn, lambda: None, var.var_type)
+        self._download_file(tmp_var)
+
+        if ext == 'zip':
+            self._update_imports(import_='zipfile')
+            input_fp = var.to_interface_name()
+
+            lines = [
+                'with zipfile.ZipFile(fn) as zf:',
+                '    zf.extractall(%r)' % (input_fp,)
+            ]
+
+            self._add(lines)
+
+        return var
+
+    def render(self, node_id, flush=False, **kwargs):
         rendered = super().render(flush)
-        return nodes.literal_block(
-            rendered, rendered, ids=[node_id], classes=['cli-usage'])
+
+        node = nodes.literal_block(rendered, rendered, ids=[node_id],
+                                   classes=['artifact-usage'])
+        return node
+
+
+class SphinxCLIUsage(CLIUsage):
+    def __init__(self, sphinx_env):
+        super().__init__(action_collection_size=AUTO_COLLECT_SIZE)
+        self.sphinx_env = sphinx_env
+
+    def _download_file(self, var):
+        fn = var.to_interface_name()
+
+        url = _build_url(self.sphinx_env, fn)
+
+        self.recorder.append('wget \\')
+        self.recorder.append('  -O %r \\' % fn)
+        self.recorder.append('  %r' % url)
+        self.recorder.append('')
+
+    def init_artifact(self, name, factory):
+        var = super().init_artifact(name, factory)
+        self._download_file(var)
+        return var
+
+    def init_metadata(self, name, factory):
+        var = super().init_metadata(name, factory)
+        self._download_file(var)
+        return var
+
+    def init_format(self, name, factory, ext=None):
+        var = super().init_format(name, factory, ext=ext)
+
+        # no ext means a dirfmt, which means we have zipped the computed res.
+        if ext is None:
+            ext = 'zip'
+
+        fn = '%s.%s' % (name, ext)
+        cli_var = self.usage_variable(fn, lambda: None, var.var_type)
+        self._download_file(cli_var)
+
+        if ext == 'zip':
+            zip_fp = var.to_interface_name()
+            out_fp = cli_var.to_interface_name()
+            self.recorder.append('unzip -d %s %s' % (zip_fp, out_fp))
+
+        return var
+
+    def render(self, node_id, flush=False, **kwargs):
+        rendered = super().render(flush)
+
+        node = nodes.literal_block(rendered, rendered, ids=[node_id],
+                                   classes=['cli-usage'])
+        return node
 
 
 class SphinxExecUsageVariable(ExecutionUsageVariable, CLIUsageVariable):
@@ -83,57 +175,118 @@ class SphinxExecUsageVariable(ExecutionUsageVariable, CLIUsageVariable):
 
 
 class SphinxExecUsage(Usage):
-    def __init__(self):
+    def __init__(self, sphinx_env):
         super().__init__()
         self.recorder = {}
+        self.sphinx_env = sphinx_env
+        self.cli_use = CLIUsage()
+        self.stdout = io.StringIO()
+        self.stderr = io.StringIO()
+        self.misc_nodes = []
 
-    def variable_factory(self, name, factory, var_type):
+    def usage_variable(self, name, factory, var_type):
         return SphinxExecUsageVariable(name, factory, var_type, self)
 
     def _add_record(self, variable):
-        variable.execute()
-        self.recorder[variable.to_interface_name()] = variable.value
+        self.recorder[variable.to_interface_name()] = variable.execute()
         return variable
-
-    def _setup_data_dir(self):
-        doc_tree_dir = pathlib.Path(self.sphinx_env.doctreedir)
-        root_build_dir = doc_tree_dir.parent / self.sphinx_env.app.builder.name
-        doc_data_dir = root_build_dir / 'data' / self.sphinx_env.docname
-        doc_data_dir.mkdir(parents=True, exist_ok=True)
-        return doc_data_dir
 
     def _save_results(self):
         fns = {}
-        doc_data_dir = self._setup_data_dir()
+        data_dir = self.sphinx_env.app.q2_data_dir
         for fn, result in self.recorder.items():
-            fp = result.save(str(doc_data_dir / fn))
-            fn_w_ext = pathlib.Path(fp).name
+            fp = str(data_dir / fn)
+            if isinstance(result, model.DirectoryFormat):
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    tmpdir = pathlib.Path(tmpdir)
+                    with redirect_stdout(self.stdout), \
+                            redirect_stderr(self.stderr):
+                        result.save(tmpdir / 'dirfmt')
+                    fp = shutil.make_archive(fp, 'zip', str(result))
+            else:
+                with redirect_stdout(self.stdout), \
+                        redirect_stderr(self.stderr):
+                    fp = result.save(fp)
+            fp = pathlib.Path(fp)
+            fn_w_ext = fp.relative_to(data_dir)
             fns[fn_w_ext] = _build_url(self.sphinx_env, fn_w_ext)
         return fns
+
+    def _build_result_link_node(self, filename, dl_url):
+        filename = str(filename)  # in case of pathlib.Path
+        spacer_node = nodes.inline(' | ', ' | ')
+        dl_node = nodes.inline('download', 'download')
+        dl_ref_node = nodes.reference('', '', dl_node, internal=False,
+                                      refuri=dl_url)
+        filename_node = nodes.literal(filename, filename)
+        content = [filename_node, spacer_node, dl_ref_node]
+
+        if filename.endswith('qza') or filename.endswith('qzv'):
+            quoted_url = urllib.parse.quote_plus(dl_url)
+            view_url = 'https://view.qiime2.org?src=%s' % (quoted_url,)
+            view_node = nodes.inline('view', 'view')
+            view_ref_node = nodes.reference('', '', view_node, internal=False,
+                                            refuri=view_url)
+            content = [filename_node, spacer_node, view_ref_node,
+                       spacer_node, dl_ref_node]
+
+        # for some reason i can't just put this all into a list_item node,
+        # but going from stuff -> paragraph -> list_item seems to work
+        para_node = nodes.paragraph('', '', *content)
+        item_node = nodes.list_item('', para_node)
+
+        return item_node
 
     def _get_result_links(self, output_paths):
         content = []
         if output_paths:
             for fn, output_path in output_paths.items():
-                content.append('* `%s <%s>`__' % (fn, output_path))
-                content.append('')
+                node = self._build_result_link_node(fn, output_path)
+                content.append(node)
         return content
 
-    def _construct_node(self, fns, node_id, state):
-        content = self._get_result_links(fns)
-        content = statemachine.ViewList(content, self.sphinx_env.docname)
-        node = nodes.bullet_list(ids=[node_id], classes=['exec-usage'])
-        state.nested_parse(content, 0, node)
+    def _construct_stdio_node(self, stream_type, content):
+        block_content = '# %s\n' % (stream_type,)
+        block_content += content
+        node = nodes.literal_block(block_content, block_content)
         return node
 
-    def render(self, node_id, state, flush=False):
+    def _construct_file_node(self, fns):
+        list_item_nodes = self._get_result_links(fns)
+        list_node = nodes.bullet_list('', *list_item_nodes)
+        return list_node
+
+    def render(self, node_id, flush=False, stdout=None, stderr=None, **kwargs):
         fns = self._save_results()
+
+        files_node = self._construct_file_node(fns)
+        container_node = nodes.compound('', files_node, ids=[node_id],
+                                        classes=['exec-usage'])
+
+        if stdout:
+            content = self.stdout.getvalue()
+            if content != '':
+                stdout_node = self._construct_stdio_node('stdout', content)
+                container_node.append(stdout_node)
+
+        if stderr:
+            content = self.stderr.getvalue()
+            if content != '':
+                stderr_node = self._construct_stdio_node('stderr', content)
+                container_node.append(stderr_node)
+
+        for misc_node in self.misc_nodes:
+            container_node.append(misc_node)
 
         if flush:
             self.recorder = {}
+            self.stdout.truncate(0)
+            self.stdout.seek(0)
+            self.stderr.truncate(0)
+            self.stderr.seek(0)
+            self.misc_nodes = []
 
-        node = self._construct_node(fns, node_id, state)
-        return node
+        return container_node
 
     def init_artifact(self, name, factory):
         variable = super().init_artifact(name, factory)
@@ -143,15 +296,56 @@ class SphinxExecUsage(Usage):
         variable = super().init_metadata(name, factory)
         return self._add_record(variable)
 
+    def init_format(self, name, factory, ext=None):
+        if ext is not None:
+            name = '%s.%s' % (name, ext)
+        variable = super().init_format(name, factory, ext=ext)
+
+        return self._add_record(variable)
+
+    def import_from_format(self, name, semantic_type, variable,
+                           view_type=None):
+        variable = super().import_from_format(
+            name, semantic_type, variable, view_type=view_type)
+        return self._add_record(variable)
+
     def merge_metadata(self, name, *variables):
         variable = super().merge_metadata(name, *variables)
         return self._add_record(variable)
 
     def get_metadata_column(self, name, column_name, variable):
-        variable = super().get_metadata_column(name, column_name, variable)
-        return self._add_record(variable)
+        return super().get_metadata_column(name, column_name, variable)
 
     def action(self, action, input_opts, output_opts):
         variables = super().action(action, input_opts, output_opts)
-        [self._add_record(v) for v in variables]
+
+        if len(variables) > AUTO_COLLECT_SIZE:
+            plugin_name = CLIUsageVariable.to_cli_name(action.plugin_id)
+            action_name = CLIUsageVariable.to_cli_name(action.action_id)
+            dir_name = self.cli_use._build_output_dir_name(plugin_name,
+                                                           action_name)
+            data_dir = self.sphinx_env.app.q2_data_dir
+            output_dir = data_dir / dir_name
+            os.mkdir(str(output_dir))
+            self.cli_use._rename_outputs(variables._asdict(), str(output_dir))
+
+        for variable in variables:
+            self._add_record(variable)
+
         return variables
+
+    def peek(self, variable):
+        result = variable.execute()
+
+        uuid = result.uuid
+        type_ = result.type
+        fmt = result.format
+
+        node_elems = []
+        for term, defn in [('UUID', uuid), ('Type', type_), ('Format', fmt)]:
+            term_node = nodes.strong(text=term+' ')
+            defn_node = nodes.literal(text=defn)
+            item_node = nodes.list_item('', term_node, defn_node)
+            node_elems.append(item_node)
+        list_node = nodes.bullet_list('', *node_elems)
+        self.misc_nodes.append(list_node)
