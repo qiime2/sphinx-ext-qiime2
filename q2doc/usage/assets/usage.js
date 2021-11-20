@@ -1,14 +1,13 @@
 KNOWN_INTERFACES = {
   'cli-usage': 'q2cli',
-  'artifact-usage': 'Artifact API',
+  'artifact-usage': 'Python 3 API',
 };
 
 window.addEventListener('load', () => {
   showInterface(Object.keys(KNOWN_INTERFACES)[0]);
 
-  const firstUsageBlock = document.getElementById('usage-0');
   const interfaceSelect = document.createElement('select');
-  interfaceSelect.addEventListener('change', (e) => showInterface(e.target.value));
+  interfaceSelect.className = 'usage-sync';
 
   for (const [value, text] of Object.entries(KNOWN_INTERFACES)) {
     const opt = document.createElement('option');
@@ -17,7 +16,28 @@ window.addEventListener('load', () => {
     interfaceSelect.appendChild(opt);
   };
 
-  firstUsageBlock.parentElement.querySelector('h1:first-of-type').after(interfaceSelect);
+  const anchorEls = document.querySelectorAll('span.usage-selector');
+  if (anchorEls.length === 0) {
+    const usageEls = document.querySelectorAll('.cli-usage, .artifact-usage');
+    if (usageEls.length > 0) {
+      const errorMsg = 'must include at least one `.. usage-selector::` directive';
+      document.body.innerHTML = errorMsg;
+    }
+  }
+
+  anchorEls.forEach((el) => {
+    const selectNode = interfaceSelect.cloneNode(true);
+    selectNode.addEventListener('change', (e) => showInterface(e.target.value));
+    el.appendChild(selectNode);
+  });
+
+  const selectEls = document.querySelectorAll('span.usage-selector select');
+  document.addEventListener('change', (e) => {
+    const target = e.target;
+    if (target.classList.contains('usage-sync')) {
+      selectEls.forEach((sel) => sel.selectedIndex = target.selectedIndex);
+    }
+  });
 });
 
 function showInterface(interfaceName) {

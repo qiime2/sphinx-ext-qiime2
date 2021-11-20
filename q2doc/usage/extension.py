@@ -2,7 +2,9 @@ import os
 import pathlib
 import pkg_resources
 
+import sphinx
 import docutils.parsers.rst.directives
+from docutils import nodes
 from sphinx.util.fileutil import copy_asset
 
 from qiime2.sdk import PluginManager
@@ -27,34 +29,96 @@ def copy_asset_files(app, pagename, templatename, context, doctree):
         app.add_css_file(str(path.name))
 
 
-def setup_usage_drivers(app):
-    PluginManager()
-    app.contexts = {
-        'artifact_api': {'use': SphinxArtifactUsage()},
-        'cli': {'use': SphinxCLIUsage()},
-        'exc': {'use': SphinxExecUsage()},
-    }
+class UsageDirectiveInterfaceSelector(docutils.parsers.rst.Directive):
+    has_content = False
+
+    def run(self):
+        tag = '<span class="usage-selector"></span>'
+        return [nodes.raw(tag, tag, format='html')]
 
 
 class UsageDirective(docutils.parsers.rst.Directive):
     has_content = True
 
-    def run(self):
-        nodes = []
-        env = self._get_env()
+    option_spec = {
+        'no-exec': docutils.parsers.rst.directives.flag,
+        'stdout': docutils.parsers.rst.directives.flag,
+        'stderr': docutils.parsers.rst.directives.flag,
+    }
 
+    def run(self):
+        if not self.content:
+            raise sphinx.errors.ExtensionError(
+                'Content required for the %s directive.' % self.name)
+
+        opts = self.options
+        no_exec = 'no_exec' in opts
+        stdout = 'stdout' in opts
+        stderr = 'stderr' in opts
+
+        self.setup()
+
+        nodes = []
         cmd = '\n'.join(self.content)
 
-        for driver_name, ctx in env.app.contexts.items():
-            use = ctx['use']
-            use.sphinx_env = env
+        env = self._get_env()
+        # this is to support this extension in the user docs, and also in
+        # a standalone setting, such as on the Library
+        if hasattr(env.config, 'command_block_no_exec'):
+            global_no_exec = env.config.command_block_no_exec
+        else:
+            global_no_exec = False
+
+        # this is to support this extension in the user docs, and also in
+        # a standalone setting, such as on the Library
+        if hasattr(env.config, 'debug_page'):
+            debug_page = env.config.debug_page
+            debug_pg_isnt_current_pg = debug_page != env.docname
+        else:
+            debug_pg_isnt_current_pg = False
+
+        for driver, ctx in env.app.contexts.items():
+            if driver == 'exc':
+                if no_exec or (global_no_exec and debug_pg_isnt_current_pg):
+                    continue
+
             exec(cmd, ctx)
             node_id = self._new_id()
-            node = ctx['use'].render(node_id, self.state, flush=True)
+            node = ctx['use'].render(
+                node_id,
+                flush=True,
+                stdout=stdout,
+                stderr=stderr,
+            )
             if node is not None:
                 nodes.append(node)
 
         return nodes
+
+    def setup(self):
+        env = self._get_env()
+
+        env.app.q2_plugin_manager = PluginManager()
+
+        if not hasattr(env.app, 'q2_current_doc'):
+            env.app.q2_current_doc = 'base case'
+
+        if env.app.q2_current_doc != env.docname:
+            env.app.q2_current_doc = env.docname
+
+            # find somewhere to stick all the result data
+            root_build_dir = pathlib.Path(env.app.outdir)
+            doc_data_dir = root_build_dir / 'data' / env.docname
+            doc_data_dir.mkdir(parents=True, exist_ok=True)
+            env.app.q2_data_dir = doc_data_dir
+
+            # these are the locals() for the individual drivers
+            env.app.contexts = {
+                # don't forget to update usage.js when changing this list
+                'artifact_api': {'use': SphinxArtifactUsage(env)},
+                'cli':          {'use': SphinxCLIUsage(env)},
+                'exc':          {'use': SphinxExecUsage(env)},
+            }
 
     def _get_env(self):
         return self.state.document.settings.env
@@ -65,7 +129,8 @@ class UsageDirective(docutils.parsers.rst.Directive):
 
 
 def setup(app):
-    app.connect('builder-inited', setup_usage_drivers)
     app.connect('html-page-context', copy_asset_files)
     app.add_directive('usage', UsageDirective)
+    app.add_directive('usage-selector', UsageDirectiveInterfaceSelector)
+
     return {'version': '0.0.1'}
