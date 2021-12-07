@@ -1,5 +1,6 @@
 import os
 import pathlib
+import traceback
 import pkg_resources
 
 import sphinx
@@ -58,7 +59,7 @@ class UsageDirective(docutils.parsers.rst.Directive):
 
         self.setup()
 
-        nodes = []
+        nodes_ = []
         cmd = '\n'.join(self.content)
 
         env = self._get_env()
@@ -81,8 +82,17 @@ class UsageDirective(docutils.parsers.rst.Directive):
             if driver == 'exc':
                 if no_exec or (global_no_exec and debug_pg_isnt_current_pg):
                     continue
+            try:
+                exec(cmd, ctx)
+            except Exception as e:
+                spacer = '=' * 79
+                error = '\n'.join(traceback.format_exception_only(type(e), e))
+                error = error.strip()
+                raise ValueError("There was a problem in the %r usage driver,"
+                                 " when executing this example:"
+                                 "\n\n%s\n%s\n%s\n%s"
+                                 % (driver, error, spacer, cmd, spacer)) from e
 
-            exec(cmd, ctx)
             node_id = self._new_id()
             node = ctx['use'].render(
                 node_id,
@@ -91,9 +101,13 @@ class UsageDirective(docutils.parsers.rst.Directive):
                 stderr=stderr,
             )
             if node is not None:
-                nodes.append(node)
+                nodes_.append(node)
 
-        return nodes
+
+        nodes_.append(
+            nodes.literal_block(cmd, cmd, ids=[self._new_id()],
+                                classes=['raw-usage']))
+        return nodes_
 
     def setup(self):
         env = self._get_env()
