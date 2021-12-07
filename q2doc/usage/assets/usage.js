@@ -1,6 +1,7 @@
 KNOWN_INTERFACES = {
-  'cli-usage': 'q2cli',
-  'artifact-usage': 'Python 3 API',
+  'cli-usage': ['Command Line (q2cli)', true],
+  'artifact-usage': ['Python 3 API (qiime2)', true],
+  'raw-usage': ['View Source (qiime2.sdk)', false],
 };
 
 window.addEventListener('load', () => {
@@ -9,16 +10,28 @@ window.addEventListener('load', () => {
   const interfaceSelect = document.createElement('select');
   interfaceSelect.className = 'usage-sync';
 
-  for (const [value, text] of Object.entries(KNOWN_INTERFACES)) {
+  const interfaceOptGroup = document.createElement('optgroup');
+  interfaceOptGroup.label = 'Interfaces';
+  interfaceSelect.appendChild(interfaceOptGroup);
+
+  const devOptGroup = document.createElement('optgroup');
+  devOptGroup.label = 'For Developers';
+  interfaceSelect.appendChild(devOptGroup);
+
+  for (const [value, [text, is_interface]] of Object.entries(KNOWN_INTERFACES)) {
     const opt = document.createElement('option');
     opt.value = value;
     opt.text = text;
-    interfaceSelect.appendChild(opt);
+    if (is_interface) {
+      interfaceOptGroup.appendChild(opt);
+    } else {
+      devOptGroup.appendChild(opt);
+    }
   };
 
   const anchorEls = document.querySelectorAll('span.usage-selector');
   if (anchorEls.length === 0) {
-    const usageEls = document.querySelectorAll('.cli-usage, .artifact-usage');
+    const usageEls = document.querySelectorAll('.cli-usage, .artifact-usage, .raw-usage');
     if (usageEls.length > 0) {
       const errorMsg = 'must include at least one `.. usage-selector::` directive';
       document.body.innerHTML = errorMsg;
