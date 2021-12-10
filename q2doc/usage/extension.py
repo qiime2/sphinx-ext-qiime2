@@ -7,6 +7,7 @@ import sphinx
 import docutils.parsers.rst.directives
 from docutils import nodes
 from sphinx.util.fileutil import copy_asset
+import sphinx.errors
 
 from qiime2.sdk import PluginManager
 
@@ -15,6 +16,15 @@ from .driver import (
     SphinxArtifactUsage,
     SphinxCLIUsage,
 )
+
+
+def setup_extension(app):
+    app.q2_usage = {
+        'plugin_manager': PluginManager(),
+        'current_doc': 'base case',
+        'contexts': {},
+        'scope_names': {},
+    }
 
 
 def copy_asset_files(app, pagename, templatename, context, doctree):
@@ -78,10 +88,13 @@ class UsageDirective(docutils.parsers.rst.Directive):
         else:
             debug_pg_isnt_current_pg = False
 
-        for driver, ctx in env.app.contexts.items():
+        scope_name = env.app.q2_usage['scope_names'][env.docname]
+
+        for driver, ctx in env.app.q2_usage['contexts'][scope_name].items():
             if driver == 'exc':
                 if no_exec or (global_no_exec and debug_pg_isnt_current_pg):
                     continue
+
             try:
                 exec(cmd, ctx)
             except Exception as e:
@@ -103,8 +116,8 @@ class UsageDirective(docutils.parsers.rst.Directive):
             if node is not None:
                 nodes_.append(node)
 
-
-        nodes_.append(
+        nodes_.insert(
+            -2,  # bc execution usage should always be _last_
             nodes.literal_block(cmd, cmd, ids=[self._new_id()],
                                 classes=['raw-usage']))
         return nodes_
@@ -112,27 +125,38 @@ class UsageDirective(docutils.parsers.rst.Directive):
     def setup(self):
         env = self._get_env()
 
-        env.app.q2_plugin_manager = PluginManager()
+        q2_usage = env.app.q2_usage
+        docname = env.docname
 
-        if not hasattr(env.app, 'q2_current_doc'):
-            env.app.q2_current_doc = 'base case'
+        # this means usage-scope directive has not been run in this doc,
+        # so let's use the current docname for the scope's name
+        if docname not in q2_usage['scope_names']:
+            q2_usage['scope_names'][docname] = docname
 
-        if env.app.q2_current_doc != env.docname:
-            env.app.q2_current_doc = env.docname
+        scope_name = q2_usage['scope_names'][docname]
+
+        # save output files based on docname always, rather than using
+        # the scope's name
+        if q2_usage['current_doc'] != docname:
+            q2_usage['current_doc'] = docname
 
             # find somewhere to stick all the result data
             root_build_dir = pathlib.Path(env.app.outdir)
-            doc_data_dir = root_build_dir / 'data' / env.docname
+            doc_data_dir = root_build_dir / 'data' / docname
             doc_data_dir.mkdir(parents=True, exist_ok=True)
-            env.app.q2_data_dir = doc_data_dir
+            q2_usage['data_dir'] = doc_data_dir
 
+        # if scope hasn't been initialized yet, do that now
+        if scope_name not in q2_usage['contexts']:
             # these are the locals() for the individual drivers
-            env.app.contexts = {
+            q2_usage['contexts'][scope_name] = {
                 # don't forget to update usage.js when changing this list
                 'artifact_api': {'use': SphinxArtifactUsage(env)},
                 'cli':          {'use': SphinxCLIUsage(env)},
                 'exc':          {'use': SphinxExecUsage(env)},
             }
+
+        env.app.q2_usage = q2_usage
 
     def _get_env(self):
         return self.state.document.settings.env
@@ -142,9 +166,31 @@ class UsageDirective(docutils.parsers.rst.Directive):
         return 'usage-%d' % (env.new_serialno('usage'),)
 
 
+class UsageScopeDirective(docutils.parsers.rst.Directive):
+    has_content = True
+
+    option_spec = {
+        'name': docutils.parsers.rst.directives.unchanged_required,
+    }
+
+    def run(self):
+        scope_name = self.options['name']
+        env = self.state.document.settings.env
+        if env.docname in env.app.q2_usage['scope_names']:
+            raise sphinx.errors.ExtensionError(
+                'cannot redefine a document\'s scope after '
+                'usage has been initialized')
+
+        env.app.q2_usage['scope_names'][env.docname] = scope_name
+        return []
+
+
 def setup(app):
+    app.connect('builder-inited', setup_extension)
     app.connect('html-page-context', copy_asset_files)
+
     app.add_directive('usage', UsageDirective)
     app.add_directive('usage-selector', UsageDirectiveInterfaceSelector)
+    app.add_directive('usage-scope', UsageScopeDirective)
 
     return {'version': '0.0.1'}

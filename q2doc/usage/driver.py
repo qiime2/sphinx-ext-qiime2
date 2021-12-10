@@ -193,7 +193,7 @@ class SphinxExecUsage(Usage):
 
     def _save_results(self):
         fns = {}
-        data_dir = self.sphinx_env.app.q2_data_dir
+        data_dir = self.sphinx_env.app.q2_usage['data_dir']
         for fn, result in self.recorder.items():
             fp = str(data_dir / fn)
             if isinstance(result, model.DirectoryFormat):
@@ -324,7 +324,7 @@ class SphinxExecUsage(Usage):
             action_name = CLIUsageVariable.to_cli_name(action.action_id)
             dir_name = self.cli_use._build_output_dir_name(plugin_name,
                                                            action_name)
-            data_dir = self.sphinx_env.app.q2_data_dir
+            data_dir = self.sphinx_env.app.q2_usage['data_dir']
             output_dir = data_dir / dir_name
             os.mkdir(str(output_dir))
             self.cli_use._rename_outputs(variables._asdict(), str(output_dir))
