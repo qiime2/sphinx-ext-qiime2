@@ -112,9 +112,11 @@ class SphinxArtifactUsage(ArtifactAPIUsage):
     def render(self, node_id, flush=False, **kwargs):
         rendered = super().render(flush)
 
-        node = nodes.literal_block(rendered, rendered, ids=[node_id],
+        if rendered == '':
+            return None
+
+        return nodes.literal_block(rendered, rendered, ids=[node_id],
                                    classes=['artifact-usage'])
-        return node
 
 
 class SphinxCLIUsage(CLIUsage):
@@ -163,9 +165,11 @@ class SphinxCLIUsage(CLIUsage):
     def render(self, node_id, flush=False, **kwargs):
         rendered = super().render(flush)
 
-        node = nodes.literal_block(rendered, rendered, ids=[node_id],
+        if rendered == '':
+            return None
+
+        return nodes.literal_block(rendered, rendered, ids=[node_id],
                                    classes=['cli-usage'])
-        return node
 
 
 class SphinxExecUsageVariable(ExecutionUsageVariable, CLIUsageVariable):
