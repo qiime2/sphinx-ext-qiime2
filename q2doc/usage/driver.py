@@ -112,9 +112,11 @@ class SphinxArtifactUsage(ArtifactAPIUsage):
     def render(self, node_id, flush=False, **kwargs):
         rendered = super().render(flush)
 
-        node = nodes.literal_block(rendered, rendered, ids=[node_id],
+        if rendered == '':
+            return None
+
+        return nodes.literal_block(rendered, rendered, ids=[node_id],
                                    classes=['artifact-usage'])
-        return node
 
 
 class SphinxCLIUsage(CLIUsage):
@@ -163,9 +165,11 @@ class SphinxCLIUsage(CLIUsage):
     def render(self, node_id, flush=False, **kwargs):
         rendered = super().render(flush)
 
-        node = nodes.literal_block(rendered, rendered, ids=[node_id],
+        if rendered == '':
+            return None
+
+        return nodes.literal_block(rendered, rendered, ids=[node_id],
                                    classes=['cli-usage'])
-        return node
 
 
 class SphinxExecUsageVariable(ExecutionUsageVariable, CLIUsageVariable):
@@ -309,9 +313,8 @@ class SphinxExecUsage(Usage):
             name, semantic_type, variable, view_type=view_type)
         return self._add_record(variable)
 
-    def merge_metadata(self, name, *variables):
-        variable = super().merge_metadata(name, *variables)
-        return self._add_record(variable)
+    # no merge_metadata or view_as_metadata, we don't need download links
+    # for those nodes.
 
     def get_metadata_column(self, name, column_name, variable):
         return super().get_metadata_column(name, column_name, variable)
