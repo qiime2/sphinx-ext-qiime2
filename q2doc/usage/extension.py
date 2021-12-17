@@ -15,6 +15,7 @@ from .driver import (
     SphinxExecUsage,
     SphinxArtifactUsage,
     SphinxCLIUsage,
+    SphinxGalaxyUsage
 )
 
 
@@ -153,6 +154,7 @@ class UsageDirective(docutils.parsers.rst.Directive):
                 # don't forget to update usage.js when changing this list
                 'artifact_api': {'use': SphinxArtifactUsage(env)},
                 'cli':          {'use': SphinxCLIUsage(env)},
+                'galaxy':       {'use': SphinxGalaxyUsage(env, self.state)},
                 'exc':          {'use': SphinxExecUsage(env)},
             }
 

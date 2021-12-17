@@ -7,11 +7,13 @@ import tempfile
 import urllib.parse
 
 from docutils import nodes
+import docutils.core
 
 from qiime2.plugin import model
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import Usage, ExecutionUsageVariable
 from q2cli.core.usage import CLIUsage, CLIUsageVariable
+from q2galaxy.api import GalaxyRSTInstructionsUsage
 
 
 AUTO_COLLECT_SIZE = 3
@@ -25,6 +27,84 @@ def _build_url(env, fn):
     parts[2] += 'data/%s/%s' % (env.docname, fn)
     url = urllib.parse.urlunparse(parts)
     return url
+
+
+class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
+    def __init__(self, sphinx_env, sphinx_state):
+        super().__init__()
+        self.sphinx_env = sphinx_env
+        self.sphinx_state = sphinx_state
+
+    def _to_cli_name(self, var):
+        # Build a tmp cli-based variable, for filename templating!
+        return CLIUsageVariable(
+            var.name, lambda: None, var.var_type, var.use).to_interface_name()
+
+    def _download_file(self, var):
+        fn = self._to_cli_name(var)
+        url = _build_url(self.sphinx_env, fn)
+
+        rst = f"""
+        Using the ``Upload Data`` tool:
+         1. On the first tab (**Regular**), press the ``Paste/Fetch data``
+            button at the bottom.
+
+            * Set *"Name"* (the first text-field) to: ``{fn}``
+            * In the larger text-area copy-and-paste: {url}
+            * (*"Type"*, *"Genome"*, and *"Settings"* can be ignored)
+
+         2. Press the ``Start`` button at the bottom.
+
+        """
+        self._add_instructions(rst)
+
+    def _download_collection(self, dir_name, path):
+        urls = [(fn, _build_url(self.sphinx_env, os.path.join(dir_name, fn)))
+                for fn in os.listdir(path)]
+
+        rst = """
+        .. code-block:: text
+
+        """
+        for fn, url in urls:
+            rst += f"""
+           {fn}\t{url}"""
+
+        rst += """
+        """
+
+        self._add_instructions(rst)
+
+    def init_metadata(self, name, factory):
+        var = super().init_metadata(name, factory)
+
+        self._download_file(var)
+
+        return var
+
+    def init_format(self, name, factory):
+        var = super().init_format(name, factory)
+
+        fmt = var.execute()
+        if isinstance(fmt, model.DirectoryFormat):
+            data_dir = self.sphinx_env.app.q2_usage['data_dir']
+            dir_name = self._to_cli_name(var)
+            save_path = os.path.join(data_dir, dir_name)
+            fmt.save(save_path)
+            self._download_collection(dir_name, save_path)
+        else:
+            self._download_file(var)
+
+        return var
+
+    def render(self, node_id, flush=False, **kwargs):
+        rendered = super().render(flush)
+        container_node = nodes.compound(
+            raw_source='', ids=[node_id], classes=['galaxy-usage'])
+        tree = docutils.core.publish_doctree('\n'.join(rendered))
+        container_node.children = tree.children
+
+        return container_node
 
 
 class SphinxArtifactUsage(ArtifactAPIUsage):
@@ -329,7 +409,7 @@ class SphinxExecUsage(Usage):
                                                            action_name)
             data_dir = self.sphinx_env.app.q2_usage['data_dir']
             output_dir = data_dir / dir_name
-            os.mkdir(str(output_dir))
+            output_dir.mkdir(exist_ok=True)
             self.cli_use._rename_outputs(variables._asdict(), str(output_dir))
 
         for variable in variables:
