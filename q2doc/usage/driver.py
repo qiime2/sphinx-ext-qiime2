@@ -82,6 +82,13 @@ class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
 
         return var
 
+    def init_artifact(self, name, factory):
+        var = super().init_artifact(name, factory)
+
+        self._download_file(var)
+
+        return var
+
     def init_format(self, name, factory):
         var = super().init_format(name, factory)
 
