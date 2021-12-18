@@ -154,7 +154,7 @@ class UsageDirective(docutils.parsers.rst.Directive):
                 # don't forget to update usage.js when changing this list
                 'artifact_api': {'use': SphinxArtifactUsage(env)},
                 'cli':          {'use': SphinxCLIUsage(env)},
-                'galaxy':       {'use': SphinxGalaxyUsage(env, self.state)},
+                'galaxy':       {'use': SphinxGalaxyUsage(env)},
                 'exc':          {'use': SphinxExecUsage(env)},
             }
 

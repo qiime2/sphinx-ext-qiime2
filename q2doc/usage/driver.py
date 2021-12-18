@@ -30,10 +30,9 @@ def _build_url(env, fn):
 
 
 class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
-    def __init__(self, sphinx_env, sphinx_state):
+    def __init__(self, sphinx_env):
         super().__init__()
         self.sphinx_env = sphinx_env
-        self.sphinx_state = sphinx_state
 
     def _to_cli_name(self, var):
         # Build a tmp cli-based variable, for filename templating!
