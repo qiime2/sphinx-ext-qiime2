@@ -20,7 +20,7 @@ AUTO_COLLECT_SIZE = 3
 
 
 def _build_url(env, fn):
-    baseurl = env.config.html_baseurl
+    baseurl = os.environ.get('Q2DOC_HTML_BASEURL', env.config.html_baseurl)
     if baseurl == '':
         raise ValueError('must set `html_baseurl` sphinx config val')
     parts = list(urllib.parse.urlparse(baseurl))
