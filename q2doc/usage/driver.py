@@ -1,19 +1,23 @@
 from contextlib import redirect_stdout, redirect_stderr
 import io
+import re
 import os
 import pathlib
 import shutil
 import tempfile
+import textwrap
 import urllib.parse
 
 from docutils import nodes
 import docutils.core
 
 from qiime2.plugin import model
+from qiime2.plugin.model.directory_format import BoundFileCollection
 from qiime2.plugins import ArtifactAPIUsage
 from qiime2.sdk.usage import Usage, ExecutionUsageVariable
 from q2cli.core.usage import CLIUsage, CLIUsageVariable
 from q2galaxy.api import GalaxyRSTInstructionsUsage
+from q2galaxy.core.util import pretty_fmt_name
 
 
 AUTO_COLLECT_SIZE = 3
@@ -29,6 +33,60 @@ def _build_url(env, fn):
     return url
 
 
+def _list_to_lines(bullets, indent):
+    marker = '- '
+    if len(bullets) > 1:
+        marker = '#. '
+
+    indent_str = ' ' * indent
+    child_indent = indent + len(marker)
+
+    lines = []
+    for bullet in bullets:
+        if type(bullet) is str:
+            entry, sub = bullet, []
+        else:
+            entry, sub = bullet
+
+        extra = ''
+        if '\n' in entry:
+            text = textwrap.dedent(entry).split('\n')
+            entry = text[0]
+            extra = textwrap.indent('\n'.join(text[1:]), ' ' * child_indent)
+
+        lines.append(''.join((indent_str, marker, entry)))
+        if extra:
+            lines.extend(extra.split('\n'))
+        if sub:
+            lines.append('')
+            lines.extend(_list_to_lines(sub, indent=child_indent))
+
+    lines.append('')
+
+    return lines
+
+
+def _collect_files(dirfmt, data_dir):
+    collections = {}
+    individuals = {}
+    paths = list(sorted(dirfmt.path.glob('**/*')))
+    for field in dirfmt._fields:
+        attr = getattr(dirfmt, field)
+        if isinstance(attr, BoundFileCollection):
+            matched = [
+                f.relative_to(data_dir) for f in paths
+                if re.match(attr.pathspec, str(f.relative_to(dirfmt.path)))]
+            collections[field] = matched
+        else:
+            for f in paths:
+                if re.match(attr.pathspec, str(f.relative_to(dirfmt.path))):
+                    break
+            else:
+                raise Exception
+            individuals[field] = f.relative_to(data_dir)
+    return collections, individuals
+
+
 class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
     def __init__(self, sphinx_env):
         super().__init__()
@@ -41,38 +99,85 @@ class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
 
     def _download_file(self, var):
         fn = self._to_cli_name(var)
-        url = _build_url(self.sphinx_env, fn)
 
-        rst = f"""
-        Using the ``Upload Data`` tool:
-         1. On the first tab (**Regular**), press the ``Paste/Fetch data``
-            button at the bottom.
+        lines = ['Using the ``Upload Data`` tool:']
+        lines.extend(_list_to_lines(self._file_bullets(fn, fn), indent=1))
 
-            * Set *"Name"* (the first text-field) to: ``{fn}``
-            * In the larger text-area copy-and-paste: {url}
-            * (*"Type"*, *"Genome"*, and *"Settings"* can be ignored)
+        self._add_instructions('\n'.join(lines))
 
-         2. Press the ``Start`` button at the bottom.
+    def _file_bullets(self, history_id, filepath):
+        url = _build_url(self.sphinx_env, filepath)
+        return [
+            ('On the first tab (**Regular**), press the ``Paste/Fetch`` data'
+             ' button at the bottom.', [
+                f'Set *"Name"* (first text-field) to: ``{history_id}``',
+                f'In the larger text-area, copy-and-paste: {url}',
+                '(*"Type"*, *"Genome"*, and *"Settings"* can be ignored)'
+             ]),
+            'Press the ``Start`` button at the bottom.'
+        ]
 
-        """
-        self._add_instructions(rst)
+    def _multifile_bullets(self, zipped_args):
+        table = '\n.. code-block:: text\n\n'
+        for history_id, filepath in zipped_args:
+            url = _build_url(self.sphinx_env, filepath)
+            table += f'   {history_id}\t{url}\n'
+        table += '\n'
+        bullets = [
+            ('On the fourth tab (**Rule-based**):', [
+                'Set *"Upload data as"* to ``Datasets``',
+                'Set *"Load tabular data from"* to ``Pasted Table``',
+                'Paste the following contents into the large text area:\n'
+                + table,
+                'Press the ``build`` button at the bottom.'
+            ]),
+            ('In the resulting UI, do the following:', [
+                'Add a rule by pressing the ``+ Rules`` button and choosing'
+                ' ``Add / Modify Column Definitions``.',
+                ('In the sidebar:', [
+                    'Press ``+Add Definition`` and select ``Name``. (This will'
+                    ' choose column "A" by default. You should see a new'
+                    ' annotation on the column header.)',
+                    'Press ``+Add Definition`` and select ``URL``.',
+                    'Change the dropdown above the button to be ``B``.'
+                    ' (You should see the table headers list ``A (Name)`` and'
+                    ' ``B (URL)``.)',
+                    'Press the ``Apply`` button.'])
+            ]),
+            'Press the ``Upload`` button at the bottom right.'
+        ]
+        return bullets
 
-    def _download_collection(self, dir_name, path):
-        urls = [(fn, _build_url(self.sphinx_env, os.path.join(dir_name, fn)))
-                for fn in os.listdir(path)]
-
-        rst = """
-        .. code-block:: text
-
-        """
-        for fn, url in urls:
-            rst += f"""
-           {fn}\t{url}"""
-
-        rst += """
-        """
-
-        self._add_instructions(rst)
+    def _collection_bullets(self, history_id, filepaths):
+        table = '\n.. code-block:: text\n\n'
+        for filepath in filepaths:
+            url = _build_url(self.sphinx_env, filepath)
+            table += f'   {filepath.relative_to(filepath.parts[0])}\t{url}\n'
+        table += '\n'
+        bullets = [
+            ('On the fourth tab (**Rule-based**):', [
+                'Set *"Upload data as"* to ``Collection(s)``',
+                'Set *"Load tabular data from"* to ``Pasted Table``',
+                'Paste the following contents into the large text area:\n'
+                + table,
+                'Press the ``build`` button at the bottom.'
+            ]),
+            ('In the resulting UI, do the following:', [
+                'Add a rule by pressing the ``+ Rules`` button and choosing'
+                ' ``Add / Modify Column Definitions``.',
+                ('In the sidebar:', [
+                    'Press ``+Add Definition`` and select'
+                    ' ``List Identifier(s)``, then select column ``A``.',
+                    'Press ``+Add Definition`` and select ``URL``.',
+                    'Change the dropdown above the button to be ``B``.'
+                    ' (You should see the table headers list'
+                    ' ``A (List Identifier)`` and ``B (URL)``.)',
+                    'Press the ``Apply`` button.'])
+            ]),
+            f'In the bottom right, set *"Name"* to be ``{history_id}``',
+            'Press the ``Upload`` button at the bottom right.'
+        ]
+        return bullets
 
     def init_metadata(self, name, factory):
         var = super().init_metadata(name, factory)
@@ -88,18 +193,131 @@ class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
 
         return var
 
-    def init_format(self, name, factory):
-        var = super().init_format(name, factory)
+    def _save_dirfmt(self, var, fmt):
+        """Save the directory format to the site's data_dir,
+        returns a new directory format mounted on the saved location.
+        """
+        data_dir = self.sphinx_env.app.q2_usage['data_dir']
+        dir_name = self._to_cli_name(var)
+        save_path = os.path.join(data_dir, dir_name)
+        fmt.save(save_path)
+        return fmt.__class__(save_path, mode='r')
 
+    def init_format(self, name, factory, ext=None):
+        if ext is not None:
+            name = '%s.%s' % (name, ext)
+        var = super().init_format(name, factory, ext=ext)
+
+        data_dir = self.sphinx_env.app.q2_usage['data_dir']
         fmt = var.execute()
+
         if isinstance(fmt, model.DirectoryFormat):
-            data_dir = self.sphinx_env.app.q2_usage['data_dir']
-            dir_name = self._to_cli_name(var)
-            save_path = os.path.join(data_dir, dir_name)
-            fmt.save(save_path)
-            self._download_collection(dir_name, save_path)
+            root_name = var.to_interface_name()
+
+            var._q2galaxy_ref = {}
+            dirfmt = self._save_dirfmt(var, fmt)
+
+            collections, individuals = _collect_files(dirfmt, data_dir)
+
+            instructions = []
+
+            for attr_name, filepaths in collections.items():
+                history_id = f'{root_name}:{attr_name}'
+                var._q2galaxy_ref[attr_name] = history_id
+                bullets = self._collection_bullets(history_id, filepaths)
+                instructions.append(
+                    (f'Steps to setup ``{history_id}``:', bullets))
+
+            bullet_args = []
+            for attr_name, filepath in individuals.items():
+                history_id = f'{root_name}:{attr_name}'
+                if filepath.name == getattr(dirfmt, attr_name).pathspec:
+                    use_name_field = False
+                else:
+                    use_name_field = True
+                var._q2galaxy_ref[attr_name] = (
+                    history_id, use_name_field, filepath.name)
+                bullet_args.append((history_id, filepath))
+
+            if len(bullet_args) == 1:
+                bullets = self._file_bullets(*bullet_args[0])
+                instructions.append(
+                    (f'Steps to setup ``{history_id}``:', bullets))
+            elif bullet_args:
+                bullets = self._multifile_bullets(bullet_args)
+                instructions.append(
+                    (f'Steps to setup ``{root_name}``:', bullets))
+
+            rst = 'Using the ``Upload Data`` tool:\n'
+            rst += '\n'.join(_list_to_lines(instructions, indent=1))
+            rst += '\n\n'
+            self._add_instructions(rst)
+
         else:
             self._download_file(var)
+
+        return var
+
+    def import_from_format(self, name, semantic_type, variable,
+                           view_type=None):
+        var = super().import_from_format(name, semantic_type, variable,
+                                         view_type=view_type)
+
+        # HACK -ish
+        if view_type is None:
+            view_type = variable.execute().__class__
+
+        galaxy_fmt = pretty_fmt_name(view_type)
+        lines = ['Using the ``qiime2 tools import`` tool:']
+        instructions = [
+            f'Set *"Type of data to import"* to ``{semantic_type}``',
+            f'Set *"QIIME 2 file format to import from"* to ``{galaxy_fmt}``',
+        ]
+        info = variable.to_interface_name()
+        if type(info) is dict:
+            for attr, ref in variable.to_interface_name().items():
+                bullets = []
+                instructions.append((
+                    f'For ``import_{attr}``, do the following:', bullets))
+
+                if type(ref) is tuple:
+                    history_id, use_name_field, name = ref
+                    if use_name_field:
+                        bullets.append(f'Set *"name"* to ``{name}``')
+                    else:
+                        bullets.append(f'Leave *"name"* as ``{name}``')
+                    bullets.append(f'Set *"data"* to ``#: {history_id}``')
+                else:
+                    bullets.extend([
+                        'Leave *"Select a mechanism"* as'
+                        ' ``Use collection to import``',
+                        f'Set *"elements"* to ``#: {ref}``',
+                        'Leave *"Append an extension?"* as ``No``.'
+                    ])
+        else:
+            instructions.append(f'Set *"data"* to ``#: {info}``')
+
+        instructions.append('Press the ``Execute`` button.')
+
+        lines.extend(_list_to_lines(instructions, indent=1))
+        lines.extend([
+            'Once completed, for the new entry in your history, use the'
+            ' ``Edit`` button to set the name as follows:',
+            ' (Renaming is optional, but it will make any subsequent steps'
+            ' easier to complete.)',
+            '',
+            ' .. list-table::',
+            '    :align: left',
+            '    :header-rows: 1',
+            '',
+            '    * - History Name',
+            '      - *"Name"* to set (be sure to press ``Save``)',
+            '    * - ``#: qiime2 tools import [...]``',
+            f'      - ``{var.to_interface_name()}``',
+            ''
+        ])
+
+        self._add_instructions('\n'.join(lines))
 
         return var
 
