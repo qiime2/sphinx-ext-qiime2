@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-
 from contextlib import redirect_stdout, redirect_stderr
 import io
 import re
