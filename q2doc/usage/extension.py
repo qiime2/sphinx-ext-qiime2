@@ -86,16 +86,11 @@ class UsageDirective(docutils.parsers.rst.Directive):
         # a standalone setting, such as on the Library
         if hasattr(env.config, 'command_block_no_exec'):
             global_no_exec = env.config.command_block_no_exec
-        else:
-            global_no_exec = False
-
-        # this is to support this extension in the user docs, and also in
-        # a standalone setting, such as on the Library
-        if hasattr(env.config, 'debug_page'):
             debug_page = env.config.debug_page
             debug_pg_isnt_current_pg = debug_page != env.docname
         else:
-            debug_pg_isnt_current_pg = False
+            global_no_exec = os.environ.get('Q2DOC_NO_EXEC', False)
+            debug_pg_isnt_current_pg = True
 
         scope_name = env.app.q2_usage['scope_names'][env.docname]
 
