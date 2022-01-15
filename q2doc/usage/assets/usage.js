@@ -1,12 +1,8 @@
-KNOWN_INTERFACES = {
-  'cli-usage': ['Command Line (q2cli)', true],
-  'galaxy-usage': ['Galaxy (q2galaxy)', true],
-  'artifact-usage': ['Python 3 API (qiime2)', true],
-  'raw-usage': ['View Source (qiime2.sdk)', false],
-};
-
 window.addEventListener('load', () => {
-  showInterface(Object.keys(KNOWN_INTERFACES)[0]);
+  const interfaceData = JSON.parse(document.getElementById('interfaces').innerHTML);
+  const KNOWN_INTERFACES = interfaceData['available'];
+
+  showInterface(interfaceData['default']);
 
   const interfaceSelect = document.createElement('select');
   interfaceSelect.className = 'usage-sync';
@@ -32,7 +28,7 @@ window.addEventListener('load', () => {
 
   const anchorEls = document.querySelectorAll('span.usage-selector');
   if (anchorEls.length === 0) {
-    const usageEls = document.querySelectorAll('.cli-usage, .artifact-usage, .galaxy-usage, .raw-usage');
+    const usageEls = document.querySelectorAll(interfaceData['classes'].join(' '));
     if (usageEls.length > 0) {
       const errorMsg = 'must include at least one `.. usage-selector::` directive';
       document.body.innerHTML = errorMsg;
@@ -41,6 +37,7 @@ window.addEventListener('load', () => {
 
   anchorEls.forEach((el) => {
     const selectNode = interfaceSelect.cloneNode(true);
+    selectNode.value = interfaceData['default'];
     selectNode.addEventListener('change', (e) => showInterface(e.target.value));
     el.appendChild(selectNode);
   });
@@ -52,13 +49,13 @@ window.addEventListener('load', () => {
       selectEls.forEach((sel) => sel.selectedIndex = target.selectedIndex);
     }
   });
-});
 
-function showInterface(interfaceName) {
-  const knownInterfaceKeys = Object.keys(KNOWN_INTERFACES);
-  if (!knownInterfaceKeys.includes(interfaceName)) { return };
-  knownInterfaceKeys.forEach((el) => {
-    const hidden = interfaceName !== el;
-    document.querySelectorAll(`.${el}`).forEach((el) => el.hidden = hidden);
-  });
-}
+  function showInterface(interfaceName) {
+    const knownInterfaceKeys = Object.keys(KNOWN_INTERFACES);
+    if (!knownInterfaceKeys.includes(interfaceName)) { return };
+    knownInterfaceKeys.forEach((el) => {
+      const hidden = interfaceName !== el;
+      document.querySelectorAll(`.${el}`).forEach((el) => el.hidden = hidden);
+    });
+  }
+});
