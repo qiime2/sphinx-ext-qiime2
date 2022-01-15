@@ -428,7 +428,7 @@ class SphinxArtifactUsage(ArtifactAPIUsage):
             return None
 
         return nodes.literal_block(rendered, rendered, ids=[node_id],
-                                   classes=['artifact-usage'])
+                                   classes=['python3-usage'])
 
 
 class SphinxCLIUsage(CLIUsage):
