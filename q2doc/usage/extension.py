@@ -6,6 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import json
 import os
 import pathlib
 import traceback
@@ -27,12 +28,50 @@ from .driver import (
 )
 
 
+BASE_CASE = object()
+
+
+INTERFACES = {
+    'artifact_api': {
+                     'driver':        SphinxArtifactUsage,
+                     'label':        'Python 3 API (qiime2)',
+                     'is_interface': True,
+                     'class_name':   'artifact-usage',
+                    },
+    'cli':          {
+                     'driver':       SphinxCLIUsage,
+                     'label':        'Command Line (q2cli)',
+                     'is_interface': True,
+                     'class_name':   'cli-usage',
+                    },
+    'galaxy':       {
+                     'driver':       SphinxGalaxyUsage,
+                     'label':        'Galaxy (q2galaxy)',
+                     'is_interface': True,
+                     'class_name':   'galaxy-usage',
+                    },
+    'exc':          {
+                     'driver':       SphinxExecUsage,
+                     'label':        'Execution Usage (non-rendering)',
+                     'is_interface': False,
+                     'class_name':   '',
+                    },
+    'raw':          {
+                     'driver':       None,
+                     'label':        'View Source (qiime2.sdk)',
+                     'is_interface': False,
+                     'class_name':   'raw-usage',
+                    },
+}
+
+
 def setup_extension(app):
     app.q2_usage = {
         'plugin_manager': PluginManager(),
-        'current_doc': 'base case',
+        'current_doc': BASE_CASE,
         'contexts': {},
         'scope_names': {},
+        'default_interfaces': {},
     }
 
 
@@ -50,11 +89,63 @@ def copy_asset_files(app, pagename, templatename, context, doctree):
 
 
 class UsageDirectiveInterfaceSelector(docutils.parsers.rst.Directive):
-    has_content = False
+    has_content = True
+
+    option_spec = {
+        'default-interface':
+            docutils.parsers.rst.directives.unchanged_required,
+    }
 
     def run(self):
+        nodes_ = self.setup()
         tag = '<span class="usage-selector"></span>'
-        return [nodes.raw(tag, tag, format='html')]
+        nodes_.append(nodes.raw(tag, tag, format='html'))
+        return nodes_
+
+    def setup(self):
+        env = self._get_env()
+
+        q2_usage = env.app.q2_usage
+        docname = env.docname
+        nodes_ = []
+
+        # this means usage-selector directive has not been run in this doc,
+        # so let's initialize the interface base case
+        if docname not in q2_usage['default_interfaces']:
+            default_interface = self.options.get(
+                'default-interface', INTERFACES['cli']['class_name'])
+
+            valid_interfaces = [x['class_name'] for x in INTERFACES.values()]
+            if default_interface not in valid_interfaces:
+                raise sphinx.errors.ExtensionError(
+                    'Invalid interface: %s' % default_interface)
+
+            interfaces = {}
+            classes = []
+            for interface in INTERFACES.values():
+                if interface['class_name'] != '':
+                    interfaces[interface['class_name']] = [
+                        interface['label'],
+                        interface['is_interface'],
+                    ]
+                    classes.append('.%s' % interface['class_name'])
+            payload = {
+                'default': default_interface,
+                'available': interfaces,
+                'classes': classes,
+            }
+
+            tag = '<script id="interfaces" type="application/json">'
+            tag += '%s</script>' % json.dumps(payload)
+
+            nodes_.append(nodes.raw(tag, tag, format='html'))
+
+            q2_usage['default_interfaces'][docname] = default_interface
+
+        return nodes_
+
+    def _get_env(self):
+        return self.state.document.settings.env
 
 
 class UsageDirective(docutils.parsers.rst.Directive):
@@ -153,13 +244,11 @@ class UsageDirective(docutils.parsers.rst.Directive):
         # if scope hasn't been initialized yet, do that now
         if scope_name not in q2_usage['contexts']:
             # these are the locals() for the individual drivers
-            q2_usage['contexts'][scope_name] = {
-                # don't forget to update usage.js when changing this list
-                'artifact_api': {'use': SphinxArtifactUsage(env)},
-                'cli':          {'use': SphinxCLIUsage(env)},
-                'galaxy':       {'use': SphinxGalaxyUsage(env)},
-                'exc':          {'use': SphinxExecUsage(env)},
-            }
+            scope = dict()
+            for k, v in INTERFACES.items():
+                if v['driver'] is not None:
+                    scope[k] = {'use': v['driver'](env)}
+            q2_usage['contexts'][scope_name] = scope
 
         env.app.q2_usage = q2_usage
 
