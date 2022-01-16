@@ -32,11 +32,11 @@ BASE_CASE = object()
 
 
 INTERFACES = {
-    'artifact_api': {
+    'python3': {
                      'driver':        SphinxArtifactUsage,
                      'label':        'Python 3 API (qiime2)',
                      'is_interface': True,
-                     'class_name':   'artifact-usage',
+                     'class_name':   'python3-usage',
                     },
     'cli':          {
                      'driver':       SphinxCLIUsage,
