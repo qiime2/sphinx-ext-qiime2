@@ -272,7 +272,7 @@ class SphinxGalaxyUsage(GalaxyRSTInstructionsUsage):
                                          view_type=view_type)
 
         # HACK -ish
-        if view_type is None:
+        if view_type is None or type(view_type) is str:
             view_type = variable.execute().__class__
 
         galaxy_fmt = pretty_fmt_name(view_type)
