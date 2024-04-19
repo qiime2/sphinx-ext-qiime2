@@ -1,15 +1,8 @@
 from dataclasses import dataclass
-import os
 import re
-import urllib.parse
-
-from docutils import nodes
 
 from qiime2.sdk import usage
-from qiime2.plugins import (
-    ArtifactAPIUsage, ArtifactAPIUsageVariable, _canonical_module
-)
-from q2cli.core.usage import CLIUsageVariable
+from qiime2.plugins import _canonical_module
 
 
 class RtifactAPIUsageVariable(usage.UsageVariable):
@@ -74,7 +67,9 @@ class RtifactAPIUsageVariable(usage.UsageVariable):
             name = "%s[%s]" % (name, key)
 
         lines = [
-            'if ( bulitins$str(%r$type) != %r ) {' % (name, str(semantic_type)),
+            'if ( bulitins$str(%r$type) != %r ) {' % (
+                name, str(semantic_type)
+            ),
             self.use.INDENT + 'stop("Output is not of the expected type.")',
             '}',
         ]

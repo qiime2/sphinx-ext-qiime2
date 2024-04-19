@@ -439,10 +439,10 @@ class SphinxRtifactUsage(RtifactAPIUsage):
         self.sphinx_env = sphinx_env
 
     def _to_cli_var(self, var):
-            # Build a tmp cli-based variable, for filename templating!
-            return CLIUsageVariable(
-                var.name, lambda: None, var.var_type, var.use
-            )
+        # Build a tmp cli-based variable, for filename templating!
+        return CLIUsageVariable(
+            var.name, lambda: None, var.var_type, var.use
+        )
 
     def _download_file(self, var):
         cli_var = self._to_cli_var(var)
@@ -526,6 +526,7 @@ class SphinxRtifactUsage(RtifactAPIUsage):
 
         return nodes.literal_block(rendered, rendered, ids=[node_id],
                                    classes=['r-usage'])
+
 
 class SphinxCLIUsage(CLIUsage):
     def __init__(self, sphinx_env):

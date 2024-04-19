@@ -2,10 +2,10 @@ import tempfile
 import textwrap
 import unittest
 
-import qiime2.sdk
 from qiime2.core.testing.util import get_dummy_plugin
 
 from q2doc.usage.driver import RtifactAPIUsage
+
 
 class TestRtifactAPIUsage(unittest.TestCase):
     @classmethod
