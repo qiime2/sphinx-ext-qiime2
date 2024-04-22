@@ -24,7 +24,8 @@ from .driver import (
     SphinxExecUsage,
     SphinxArtifactUsage,
     SphinxCLIUsage,
-    SphinxGalaxyUsage
+    SphinxGalaxyUsage,
+    SphinxRtifactUsage
 )
 
 
@@ -38,6 +39,12 @@ INTERFACES = {
                      'is_interface': True,
                      'class_name':   'python3-usage',
                     },
+    'R': {
+                    'driver':        SphinxRtifactUsage,
+                    'label':         'R API (qiime2)',
+                    'is_interface':  True,
+                    'class_name':    'r-usage',
+    },
     'cli':          {
                      'driver':       SphinxCLIUsage,
                      'label':        'Command Line (q2cli)',
