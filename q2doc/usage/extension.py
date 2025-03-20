@@ -10,7 +10,7 @@ import json
 import os
 import pathlib
 import traceback
-import pkg_resources
+import importlib
 
 import sphinx
 import docutils.parsers.rst.directives
@@ -83,7 +83,7 @@ def setup_extension(app):
 
 
 def copy_asset_files(app, pagename, templatename, context, doctree):
-    base_fp = pkg_resources.resource_filename('q2doc', 'usage')
+    base_fp = importlib.resources.files('q2doc') / 'usage'
     asset_path = pathlib.Path(base_fp) / 'assets'
 
     for path in asset_path.glob('*.js'):

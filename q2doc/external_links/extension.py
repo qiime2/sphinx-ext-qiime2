@@ -8,13 +8,13 @@
 
 import os
 import pathlib
-import pkg_resources
+import importlib
 
 from sphinx.util.fileutil import copy_asset
 
 
 def copy_asset_files(app, pagename, templatename, context, doctree):
-    base_fp = pkg_resources.resource_filename('q2doc', 'external_links')
+    base_fp = importlib.resources.files('q2doc') / 'external_links'
     asset_path = pathlib.Path(base_fp) / 'assets'
 
     for path in asset_path.glob('*.js'):
